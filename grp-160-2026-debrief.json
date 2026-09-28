@@ -1,0 +1,1634 @@
+{
+  "name": "GRP 2026 Ultra Tour",
+  "settings": {
+    "pace_base_s_per_km": 500,
+    "fatigue_coefficient": 0.002,
+    "life_base_stop_s": 3600,
+    "weather": {
+      "names": [],
+      "values": []
+    }
+  },
+  "totals": {
+    "distance_m_planned": 173301.31029685083,
+    "elevation_gain_m_planned": 11301.045,
+    "distance_m_device": 182906.7,
+    "ascent_m_device": 11377,
+    "duration_s_planned": 151144.47224472804,
+    "duration_s_actual": 178829,
+    "moving_s_actual": 168429,
+    "stopped_s_actual": 10400,
+    "distance_m_reached": 173301.31029685083,
+    "finished": true,
+    "samples": 176625,
+    "samples_off_route": 10709,
+    "distance_m_off_route": 10303.040000000023,
+    "records_without_position": 2143,
+    "epoch_s_start_planned": 1787281200,
+    "epoch_s_start_actual": 1787281427,
+    "utc_offset_s": 7200
+  },
+  "checkpoints": [
+    {
+      "name": "Vielle-Aure",
+      "type_name": "Start",
+      "distance_m": 0,
+      "elevation_gain_m": 0,
+      "duration_s_planned": 0,
+      "duration_s_actual": 0,
+      "delta_s": 0,
+      "stop_s_planned": 0,
+      "stop_s_actual": 63,
+      "epoch_s_arrival_actual": 1787281427,
+      "epoch_s_cutoff": 1787281200,
+      "margin_s_planned": null,
+      "margin_s_actual": null
+    },
+    {
+      "name": "Restaurant Merlans",
+      "type_name": "TimeBarrier",
+      "distance_m": 15669.072854324277,
+      "elevation_gain_m": 1542.675,
+      "duration_s_planned": 14018.327045099666,
+      "duration_s_actual": 10841.357728719711,
+      "delta_s": -3176.9693163799548,
+      "stop_s_planned": 0,
+      "stop_s_actual": 244.6422712802887,
+      "epoch_s_arrival_actual": 1787292268,
+      "epoch_s_cutoff": 1787293800,
+      "margin_s_planned": -1418.327045099666,
+      "margin_s_actual": 1287.3577287197113
+    },
+    {
+      "name": "La Mongie",
+      "type_name": "TimeBarrier",
+      "distance_m": 30675.23263156757,
+      "elevation_gain_m": 2497.175,
+      "duration_s_planned": 24947.63899270488,
+      "duration_s_actual": 25958.139445066452,
+      "delta_s": 1010.5004523615717,
+      "stop_s_planned": 0,
+      "stop_s_actual": 692.860554933548,
+      "epoch_s_arrival_actual": 1787307385,
+      "epoch_s_cutoff": 1787310000,
+      "margin_s_planned": 3852.3610072951196,
+      "margin_s_actual": 1922.139445066452
+    },
+    {
+      "name": "Col de Sencours",
+      "type_name": "TimeBarrier",
+      "distance_m": 38264.48770985857,
+      "elevation_gain_m": 3367.175,
+      "duration_s_planned": 32545.558857878255,
+      "duration_s_actual": 33893.7432243824,
+      "delta_s": 1348.1843665041451,
+      "stop_s_planned": 0,
+      "stop_s_actual": 288.2567756175995,
+      "epoch_s_arrival_actual": 1787315321,
+      "epoch_s_cutoff": 1787317200,
+      "margin_s_planned": 3454.4411421217446,
+      "margin_s_actual": 1590.7432243824005
+    },
+    {
+      "name": "Col de Sencours (retour)",
+      "type_name": "TimeBarrier",
+      "distance_m": 44883.92052599167,
+      "elevation_gain_m": 3877.675,
+      "duration_s_planned": 37895.036579876214,
+      "duration_s_actual": 39131,
+      "delta_s": 1235.963420123786,
+      "stop_s_planned": 0,
+      "stop_s_actual": 690,
+      "epoch_s_arrival_actual": 1787320558,
+      "epoch_s_cutoff": 1787322600,
+      "margin_s_planned": 3504.963420123786,
+      "margin_s_actual": 1352
+    },
+    {
+      "name": "Descente Aoube",
+      "type_name": "TimeBarrier",
+      "distance_m": 50491.41010092073,
+      "elevation_gain_m": 4198.675,
+      "duration_s_planned": 41966.78215654384,
+      "duration_s_actual": 44688,
+      "delta_s": 2721.2178434561574,
+      "stop_s_planned": 0,
+      "stop_s_actual": 49,
+      "epoch_s_arrival_actual": 1787326115,
+      "epoch_s_cutoff": 1787327400,
+      "margin_s_planned": 4233.217843456157,
+      "margin_s_actual": 1236
+    },
+    {
+      "name": "Hautacam",
+      "type_name": "TimeBarrier",
+      "distance_m": 64323.074299204716,
+      "elevation_gain_m": 4959.675,
+      "duration_s_planned": 51793.3864823913,
+      "duration_s_actual": 56594.40632939339,
+      "delta_s": 4801.019847002084,
+      "stop_s_planned": 0,
+      "stop_s_actual": 55.59367060661316,
+      "epoch_s_arrival_actual": 1787338021,
+      "epoch_s_cutoff": 1787339700,
+      "margin_s_planned": 6706.613517608697,
+      "margin_s_actual": 1623.4063293933868
+    },
+    {
+      "name": "Pierrefitte",
+      "type_name": "LifeBase",
+      "distance_m": 76439.0500366812,
+      "elevation_gain_m": 5117.514999999999,
+      "duration_s_planned": 58278.80940923483,
+      "duration_s_actual": 64921.3909175396,
+      "delta_s": 6642.581508304764,
+      "stop_s_planned": 3600,
+      "stop_s_actual": 1759.6090824604034,
+      "epoch_s_arrival_actual": 1787346348,
+      "epoch_s_cutoff": 1787349600,
+      "margin_s_planned": 6521.190590765167,
+      "margin_s_actual": 1492.3909175395966
+    },
+    {
+      "name": "Lac d'Estaing",
+      "type_name": "TimeBarrier",
+      "distance_m": 97412.31986635324,
+      "elevation_gain_m": 6658.014999999999,
+      "duration_s_planned": 80537.59119915066,
+      "duration_s_actual": 88524,
+      "delta_s": 7986.408800849342,
+      "stop_s_planned": 0,
+      "stop_s_actual": 826,
+      "epoch_s_arrival_actual": 1787369951,
+      "epoch_s_cutoff": 1787371200,
+      "margin_s_planned": 9462.408800849342,
+      "margin_s_actual": 423
+    },
+    {
+      "name": "Cauterets",
+      "type_name": "TimeBarrier",
+      "distance_m": 113290.60106153491,
+      "elevation_gain_m": 7885.284999999999,
+      "duration_s_planned": 96213.96769667717,
+      "duration_s_actual": 105254.26049923897,
+      "delta_s": 9040.292802561802,
+      "stop_s_planned": 0,
+      "stop_s_actual": 1087.739500761032,
+      "epoch_s_arrival_actual": 1787386681,
+      "epoch_s_cutoff": 1787389200,
+      "margin_s_planned": 11786.032303322834,
+      "margin_s_actual": 1431.260499238968
+    },
+    {
+      "name": "Luz Saint Sauveur",
+      "type_name": "LifeBase",
+      "distance_m": 131127.38558539585,
+      "elevation_gain_m": 8938.045,
+      "duration_s_planned": 111252.01313631829,
+      "duration_s_actual": 124213.36493086815,
+      "delta_s": 12961.35179454986,
+      "stop_s_planned": 3600,
+      "stop_s_actual": 2428.635069131851,
+      "epoch_s_arrival_actual": 1787405640,
+      "epoch_s_cutoff": 1787410800,
+      "margin_s_planned": 14747.986863681712,
+      "margin_s_actual": 2731.364930868149
+    },
+    {
+      "name": "Tournaboup",
+      "type_name": "TimeBarrier",
+      "distance_m": 143343.28649738902,
+      "elevation_gain_m": 9918.045,
+      "duration_s_planned": 127082.82239099508,
+      "duration_s_actual": 138707.49670147896,
+      "delta_s": 11624.674310483882,
+      "stop_s_planned": 0,
+      "stop_s_actual": 79.50329852104187,
+      "epoch_s_arrival_actual": 1787420134,
+      "epoch_s_cutoff": 1787425200,
+      "margin_s_planned": 16917.177609004924,
+      "margin_s_actual": 4986.496701478958
+    },
+    {
+      "name": "Refuge d'Aygues Cluses",
+      "type_name": "TimeBarrier",
+      "distance_m": 149757.98065482188,
+      "elevation_gain_m": 10605.545,
+      "duration_s_planned": 134786.25416192051,
+      "duration_s_actual": 148781.42368912697,
+      "delta_s": 13995.169527206453,
+      "stop_s_planned": 0,
+      "stop_s_actual": 550.5763108730316,
+      "epoch_s_arrival_actual": 1787430208,
+      "epoch_s_cutoff": 1787436000,
+      "margin_s_planned": 20013.745838079485,
+      "margin_s_actual": 5241.423689126968
+    },
+    {
+      "name": "Restaurant Merlans (retour)",
+      "type_name": "TimeBarrier",
+      "distance_m": 159719.6521830815,
+      "elevation_gain_m": 11110.045,
+      "duration_s_planned": 142991.86048492813,
+      "duration_s_actual": 163403,
+      "delta_s": 20411.139515071874,
+      "stop_s_planned": 0,
+      "stop_s_actual": 52,
+      "epoch_s_arrival_actual": 1787444830,
+      "epoch_s_cutoff": 1787448600,
+      "margin_s_planned": 24408.139515071874,
+      "margin_s_actual": 3718
+    },
+    {
+      "name": "Vielle-Aure",
+      "type_name": "Arrival",
+      "distance_m": 173301.31029685083,
+      "elevation_gain_m": 11301.045,
+      "duration_s_planned": 151144.47224472804,
+      "duration_s_actual": 178829,
+      "delta_s": 27684.527755271964,
+      "stop_s_planned": 0,
+      "stop_s_actual": null,
+      "epoch_s_arrival_actual": 1787460256,
+      "epoch_s_cutoff": 1787461200,
+      "margin_s_planned": 28855.527755271964,
+      "margin_s_actual": 944
+    }
+  ],
+  "sections": [
+    {
+      "from": "Vielle-Aure",
+      "to": "Restaurant Merlans",
+      "distance_m": 15669.072854324277,
+      "elevation_gain_m": 1542.675,
+      "elevation_loss_m": 298.17499999999995,
+      "moving_s_planned": 14018.327045099666,
+      "moving_s_actual": 10833.357728719711,
+      "stopped_s_actual": 8,
+      "pace_ratio": 0.772799613952985,
+      "heart_rate_bpm_average": 155.9251914030071,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Restaurant Merlans",
+      "to": "La Mongie",
+      "distance_m": 15006.159777243294,
+      "elevation_gain_m": 954.5000000000002,
+      "elevation_loss_m": 1260.5,
+      "moving_s_planned": 10929.311947605214,
+      "moving_s_actual": 14706.78171634674,
+      "stopped_s_actual": 410,
+      "pace_ratio": 1.3456274088296318,
+      "heart_rate_bpm_average": 113.31104055037375,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "La Mongie",
+      "to": "Col de Sencours",
+      "distance_m": 7589.255078291,
+      "elevation_gain_m": 870,
+      "elevation_loss_m": 228.5,
+      "moving_s_planned": 7597.919865173375,
+      "moving_s_actual": 7885.6037793159485,
+      "stopped_s_actual": 50,
+      "pace_ratio": 1.0378635099142375,
+      "heart_rate_bpm_average": 141.33660995589162,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Col de Sencours",
+      "to": "Col de Sencours (retour)",
+      "distance_m": 6619.4328161331,
+      "elevation_gain_m": 510.5,
+      "elevation_loss_m": 510.5000000000002,
+      "moving_s_planned": 5349.477721997959,
+      "moving_s_actual": 5135.2567756175995,
+      "stopped_s_actual": 102,
+      "pace_ratio": 0.9599547923156224,
+      "heart_rate_bpm_average": 133.90015273004963,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Col de Sencours (retour)",
+      "to": "Descente Aoube",
+      "distance_m": 5607.489574929059,
+      "elevation_gain_m": 321,
+      "elevation_loss_m": 494.5,
+      "moving_s_planned": 4071.7455766676285,
+      "moving_s_actual": 4818,
+      "stopped_s_actual": 739,
+      "pace_ratio": 1.1832762900532494,
+      "heart_rate_bpm_average": 115.1601583588267,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Descente Aoube",
+      "to": "Hautacam",
+      "distance_m": 13831.664198283986,
+      "elevation_gain_m": 761,
+      "elevation_loss_m": 1417,
+      "moving_s_planned": 9826.60432584746,
+      "moving_s_actual": 11316.406329393387,
+      "stopped_s_actual": 590,
+      "pace_ratio": 1.151609035445461,
+      "heart_rate_bpm_average": 109.2306400134386,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Hautacam",
+      "to": "Pierrefitte",
+      "distance_m": 12115.975737476489,
+      "elevation_gain_m": 157.83999999999924,
+      "elevation_loss_m": 1212.3400000000001,
+      "moving_s_planned": 6485.42292684353,
+      "moving_s_actual": 8186.98458814621,
+      "stopped_s_actual": 140,
+      "pace_ratio": 1.2623671085905315,
+      "heart_rate_bpm_average": 104.99555662303351,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Pierrefitte",
+      "to": "Lac d'Estaing",
+      "distance_m": 20973.269829672034,
+      "elevation_gain_m": 1540.5,
+      "elevation_loss_m": 852.7550000000001,
+      "moving_s_planned": 18658.781789915825,
+      "moving_s_actual": 21764.609082460403,
+      "stopped_s_actual": 1838,
+      "pace_ratio": 1.1664539157761697,
+      "heart_rate_bpm_average": 124.2562809812312,
+      "distance_m_off_route": 494.0200000000041
+    },
+    {
+      "from": "Lac d'Estaing",
+      "to": "Cauterets",
+      "distance_m": 15878.28119518167,
+      "elevation_gain_m": 1227.2699999999995,
+      "elevation_loss_m": 1436.0149999999994,
+      "moving_s_planned": 15676.376497526508,
+      "moving_s_actual": 15930.260499238968,
+      "stopped_s_actual": 800,
+      "pace_ratio": 1.0161953243310098,
+      "heart_rate_bpm_average": 105.96037059175134,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Cauterets",
+      "to": "Luz Saint Sauveur",
+      "distance_m": 17836.784523860944,
+      "elevation_gain_m": 1052.7600000000011,
+      "elevation_loss_m": 1322.7600000000002,
+      "moving_s_planned": 15038.045439641122,
+      "moving_s_actual": 17987.10443162918,
+      "stopped_s_actual": 972,
+      "pace_ratio": 1.1961065355085425,
+      "heart_rate_bpm_average": 107.92647291523815,
+      "distance_m_off_route": 438.5500000000029
+    },
+    {
+      "from": "Luz Saint Sauveur",
+      "to": "Tournaboup",
+      "distance_m": 12215.900911993172,
+      "elevation_gain_m": 980,
+      "elevation_loss_m": 214,
+      "moving_s_planned": 12230.809254676788,
+      "moving_s_actual": 13367.13177061081,
+      "stopped_s_actual": 1127,
+      "pace_ratio": 1.0929065683449783,
+      "heart_rate_bpm_average": 101.66242818843355,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Tournaboup",
+      "to": "Refuge d'Aygues Cluses",
+      "distance_m": 6414.694157432852,
+      "elevation_gain_m": 687.5,
+      "elevation_loss_m": 8.5,
+      "moving_s_planned": 7703.431770925439,
+      "moving_s_actual": 8682.92698764801,
+      "stopped_s_actual": 1391,
+      "pace_ratio": 1.1271505019904786,
+      "heart_rate_bpm_average": 103.7656343061346,
+      "distance_m_off_route": 0
+    },
+    {
+      "from": "Refuge d'Aygues Cluses",
+      "to": "Restaurant Merlans (retour)",
+      "distance_m": 9961.671528259612,
+      "elevation_gain_m": 504.5,
+      "elevation_loss_m": 623,
+      "moving_s_planned": 8205.60632300761,
+      "moving_s_actual": 13729.576310873032,
+      "stopped_s_actual": 892,
+      "pace_ratio": 1.6731946148058336,
+      "heart_rate_bpm_average": 84.51990151826016,
+      "distance_m_off_route": 244.05999999999767
+    },
+    {
+      "from": "Restaurant Merlans (retour)",
+      "to": "Vielle-Aure",
+      "distance_m": 13581.658113769343,
+      "elevation_gain_m": 191,
+      "elevation_loss_m": 1418.5000000000036,
+      "moving_s_planned": 8152.611759799911,
+      "moving_s_actual": 14085,
+      "stopped_s_actual": 1341,
+      "pace_ratio": 1.7276672083727052,
+      "heart_rate_bpm_average": 89.8448722935304,
+      "distance_m_off_route": 9133.139999999985
+    }
+  ],
+  "climbs": [
+    {
+      "distance_m_start": 0,
+      "distance_m": 10802.790275066674,
+      "elevation_gain_m": 1111,
+      "gradient_percent_average": 10.28437997694205,
+      "elevation_m_summit": 1902,
+      "duration_s_planned": 10400.668643759172,
+      "duration_s_actual": 7718.286011695862,
+      "vam_m_per_h_planned": 384.5521991896092,
+      "vam_m_per_h_actual": 518.1979514544068,
+      "heart_rate_bpm_average": 154.73464628142005
+    },
+    {
+      "distance_m_start": 12071.82022066697,
+      "distance_m": 2119.4053009112595,
+      "elevation_gain_m": 400,
+      "gradient_percent_average": 18.873218814165277,
+      "elevation_m_summit": 2214,
+      "duration_s_planned": 2678.4347359811327,
+      "duration_s_actual": 2090.991593360901,
+      "vam_m_per_h_planned": 537.6274361497616,
+      "vam_m_per_h_actual": 688.6684789035683,
+      "heart_rate_bpm_average": 158.98804399808705
+    },
+    {
+      "distance_m_start": 15688.447676637392,
+      "distance_m": 919.8849420237093,
+      "elevation_gain_m": 99.46000000000004,
+      "gradient_percent_average": 10.812221774300609,
+      "elevation_m_summit": 2134,
+      "duration_s_planned": 872.8219178487961,
+      "duration_s_actual": 740.7044668197632,
+      "vam_m_per_h_planned": 410.2280117833019,
+      "vam_m_per_h_actual": 483.39927196243906,
+      "heart_rate_bpm_average": 147.17139001349528
+    },
+    {
+      "distance_m_start": 17039.72556976032,
+      "distance_m": 4282.157542054316,
+      "elevation_gain_m": 395,
+      "gradient_percent_average": 9.224321994713518,
+      "elevation_m_summit": 2506,
+      "duration_s_planned": 3923.124460777697,
+      "duration_s_actual": 3840.008413553238,
+      "vam_m_per_h_planned": 362.466196068149,
+      "vam_m_per_h_actual": 370.31168863617006,
+      "heart_rate_bpm_average": 139.95625
+    },
+    {
+      "distance_m_start": 24105.707530460804,
+      "distance_m": 787.9978467526598,
+      "elevation_gain_m": 46,
+      "gradient_percent_average": 5.837579403238989,
+      "elevation_m_summit": 2161,
+      "duration_s_planned": 619.5926776476481,
+      "duration_s_actual": 945.8515725135803,
+      "vam_m_per_h_planned": 267.27236452941736,
+      "vam_m_per_h_actual": 175.0803242414891,
+      "heart_rate_bpm_average": 95.13953488372093
+    },
+    {
+      "distance_m_start": 27659.163790769464,
+      "distance_m": 1719.3615941647986,
+      "elevation_gain_m": 396,
+      "gradient_percent_average": 23.031804440901332,
+      "elevation_m_summit": 2072,
+      "duration_s_planned": 2776.488706801447,
+      "duration_s_actual": 2608.5207839012146,
+      "vam_m_per_h_planned": 513.4542764419564,
+      "vam_m_per_h_actual": 546.5166345609565,
+      "heart_rate_bpm_average": 142.96932515337423
+    },
+    {
+      "distance_m_start": 33214.18594431592,
+      "distance_m": 8332.870284649463,
+      "elevation_gain_m": 1276,
+      "gradient_percent_average": 15.31285087145308,
+      "elevation_m_summit": 2835,
+      "duration_s_planned": 10357.174325413285,
+      "duration_s_actual": 9152.048661231995,
+      "vam_m_per_h_planned": 443.51865245028597,
+      "vam_m_per_h_actual": 501.92040820963433,
+      "heart_rate_bpm_average": 144.87982082377363
+    },
+    {
+      "distance_m_start": 46456.31318542265,
+      "distance_m": 894.9719939472125,
+      "elevation_gain_m": 128,
+      "gradient_percent_average": 14.302123515113003,
+      "elevation_m_summit": 2328,
+      "duration_s_planned": 1089.8565494860886,
+      "duration_s_actual": 877.8270175457001,
+      "vam_m_per_h_planned": 422.8079376293016,
+      "vam_m_per_h_actual": 524.9325787309918,
+      "heart_rate_bpm_average": 128.17559863169896
+    },
+    {
+      "distance_m_start": 48432.92316155909,
+      "distance_m": 1054.2011806379523,
+      "elevation_gain_m": 165,
+      "gradient_percent_average": 15.651661469412307,
+      "elevation_m_summit": 2383,
+      "duration_s_planned": 1419.4945314991492,
+      "duration_s_actual": 1213.7787182331085,
+      "vam_m_per_h_planned": 418.45881531693385,
+      "vam_m_per_h_actual": 489.38079987485924,
+      "heart_rate_bpm_average": 131.88550247116967
+    },
+    {
+      "distance_m_start": 53847.52370155824,
+      "distance_m": 1317.9620013536696,
+      "elevation_gain_m": 292,
+      "gradient_percent_average": 22.155418722246075,
+      "elevation_m_summit": 2248,
+      "duration_s_planned": 2326.0966260710265,
+      "duration_s_actual": 1924.88134765625,
+      "vam_m_per_h_planned": 451.91587839391065,
+      "vam_m_per_h_actual": 546.111583074951,
+      "heart_rate_bpm_average": 135.5444155844156
+    },
+    {
+      "distance_m_start": 58107.759738724235,
+      "distance_m": 1422.852896613549,
+      "elevation_gain_m": 210,
+      "gradient_percent_average": 14.75908019021566,
+      "elevation_m_summit": 1878,
+      "duration_s_planned": 1817.0450702806265,
+      "duration_s_actual": 1601.850046634674,
+      "vam_m_per_h_planned": 416.0601255109442,
+      "vam_m_per_h_actual": 471.95428909733465,
+      "heart_rate_bpm_average": 130.5461922596754
+    },
+    {
+      "distance_m_start": 64568.0634426064,
+      "distance_m": 1277.8401577675031,
+      "elevation_gain_m": 46,
+      "gradient_percent_average": 3.599824259738868,
+      "elevation_m_summit": 1541,
+      "duration_s_planned": 937.4991729231333,
+      "duration_s_actual": 1128.3718314170837,
+      "vam_m_per_h_planned": 176.6401558346524,
+      "vam_m_per_h_actual": 146.7601329537167,
+      "heart_rate_bpm_average": 109.19858156028369
+    },
+    {
+      "distance_m_start": 73791.03452794786,
+      "distance_m": 11415.202165667288,
+      "elevation_gain_m": 1201,
+      "gradient_percent_average": 10.521057643746024,
+      "elevation_m_summit": 1666,
+      "duration_s_planned": 16085.781366946772,
+      "duration_s_actual": 13634.71238064766,
+      "vam_m_per_h_planned": 268.78395903628143,
+      "vam_m_per_h_actual": 317.1023985908697,
+      "heart_rate_bpm_average": 125.94381692826757
+    },
+    {
+      "distance_m_start": 90593.16788275698,
+      "distance_m": 2265.060604734492,
+      "elevation_gain_m": 142,
+      "gradient_percent_average": 6.269147929339626,
+      "elevation_m_summit": 1201,
+      "duration_s_planned": 2014.3498208541423,
+      "duration_s_actual": 2203.7495753765106,
+      "vam_m_per_h_planned": 253.7791572782708,
+      "vam_m_per_h_actual": 231.9682806575976,
+      "heart_rate_bpm_average": 123.30263157894737
+    },
+    {
+      "distance_m_start": 93812.47854041772,
+      "distance_m": 8937.106478046451,
+      "elevation_gain_m": 1172,
+      "gradient_percent_average": 13.113864122341596,
+      "elevation_m_summit": 2254,
+      "duration_s_planned": 12632.302744049157,
+      "duration_s_actual": 10686.250802516937,
+      "vam_m_per_h_planned": 334.0008615600657,
+      "vam_m_per_h_actual": 394.8250960950917,
+      "heart_rate_bpm_average": 126.19661239004304
+    },
+    {
+      "distance_m_start": 112841.75800555262,
+      "distance_m": 942.0624063480791,
+      "elevation_gain_m": 116,
+      "gradient_percent_average": 12.313409304769518,
+      "elevation_m_summit": 1075,
+      "duration_s_planned": 1200.146847819502,
+      "duration_s_actual": 1955.8557028770447,
+      "vam_m_per_h_planned": 347.9574193430749,
+      "vam_m_per_h_actual": 213.51268367380806,
+      "heart_rate_bpm_average": 96.55521472392638
+    },
+    {
+      "distance_m_start": 114806.71572444959,
+      "distance_m": 6672.297920984827,
+      "elevation_gain_m": 909,
+      "gradient_percent_average": 13.623492397441272,
+      "elevation_m_summit": 1944,
+      "duration_s_planned": 8884.027323045448,
+      "duration_s_actual": 7592.134688615799,
+      "vam_m_per_h_planned": 368.3464583130323,
+      "vam_m_per_h_actual": 431.02501920927136,
+      "heart_rate_bpm_average": 124.57060063224446
+    },
+    {
+      "distance_m_start": 129066.78769446728,
+      "distance_m": 7128.212474739776,
+      "elevation_gain_m": 466,
+      "gradient_percent_average": 6.537403334305238,
+      "elevation_m_summit": 1124,
+      "duration_s_planned": 10613.81088644435,
+      "duration_s_actual": 8944,
+      "vam_m_per_h_planned": 158.05821471179422,
+      "vam_m_per_h_actual": 187.567084078712,
+      "heart_rate_bpm_average": 118.76628914057295
+    },
+    {
+      "distance_m_start": 136567.78367467475,
+      "distance_m": 3130.979151814652,
+      "elevation_gain_m": 356,
+      "gradient_percent_average": 11.370244985300193,
+      "elevation_m_summit": 1458,
+      "duration_s_planned": 3982.530067803309,
+      "duration_s_actual": 3577.1950500011444,
+      "vam_m_per_h_planned": 321.8054799789389,
+      "vam_m_per_h_actual": 358.26953299613615,
+      "heart_rate_bpm_average": 83.81716522225328
+    },
+    {
+      "distance_m_start": 141178.07833814065,
+      "distance_m": 10772.590453691373,
+      "elevation_gain_m": 1087,
+      "gradient_percent_average": 10.090423512085943,
+      "elevation_m_summit": 2455,
+      "duration_s_planned": 12727.47253927571,
+      "duration_s_actual": 15744.042497873306,
+      "vam_m_per_h_planned": 307.4608872990498,
+      "vam_m_per_h_actual": 248.55115835266528,
+      "heart_rate_bpm_average": 99.3610899390244
+    },
+    {
+      "distance_m_start": 157478.609228068,
+      "distance_m": 4040.040135878866,
+      "elevation_gain_m": 379,
+      "gradient_percent_average": 9.381094921165994,
+      "elevation_m_summit": 2210,
+      "duration_s_planned": 4795.709184173873,
+      "duration_s_actual": 5025.585160255432,
+      "vam_m_per_h_planned": 284.5043240950893,
+      "vam_m_per_h_actual": 271.4907730129187,
+      "heart_rate_bpm_average": 107.30527363184079
+    }
+  ],
+  "splits": [
+    {
+      "distance_m": 1000,
+      "duration_s_planned": 614.3929221239439,
+      "duration_s_actual": 407.37283062934875
+    },
+    {
+      "distance_m": 2000,
+      "duration_s_planned": 1339.789640965213,
+      "duration_s_actual": 846.0305352210999
+    },
+    {
+      "distance_m": 3000,
+      "duration_s_planned": 2316.7893144273908,
+      "duration_s_actual": 1599.0029706954956
+    },
+    {
+      "distance_m": 4000,
+      "duration_s_planned": 3292.3514568762203,
+      "duration_s_actual": 2296.3453941345215
+    },
+    {
+      "distance_m": 5000,
+      "duration_s_planned": 4341.596494274079,
+      "duration_s_actual": 3057.4637393951416
+    },
+    {
+      "distance_m": 6000,
+      "duration_s_planned": 5377.32944610974,
+      "duration_s_actual": 3774.9291982650757
+    },
+    {
+      "distance_m": 7000,
+      "duration_s_planned": 6880.503326825808,
+      "duration_s_actual": 4848.118167638779
+    },
+    {
+      "distance_m": 8000,
+      "duration_s_planned": 7750.122092759421,
+      "duration_s_actual": 5534.134843587875
+    },
+    {
+      "distance_m": 9000,
+      "duration_s_planned": 8498.188731939195,
+      "duration_s_actual": 6233.23212480545
+    },
+    {
+      "distance_m": 10000,
+      "duration_s_planned": 9782.252872347177,
+      "duration_s_actual": 7203.800986528397
+    },
+    {
+      "distance_m": 11000,
+      "duration_s_planned": 10463.228163763135,
+      "duration_s_actual": 7796.696269035339
+    },
+    {
+      "distance_m": 12000,
+      "duration_s_planned": 10835.634132104742,
+      "duration_s_actual": 8147.158070802689
+    },
+    {
+      "distance_m": 13000,
+      "duration_s_planned": 11787.65531794678,
+      "duration_s_actual": 8902.12430524826
+    },
+    {
+      "distance_m": 14000,
+      "duration_s_planned": 13210.054049855089,
+      "duration_s_actual": 10024.193289279938
+    },
+    {
+      "distance_m": 15000,
+      "duration_s_planned": 13812.97743743207,
+      "duration_s_actual": 10564.757999897003
+    },
+    {
+      "distance_m": 16000,
+      "duration_s_planned": 14268.777128413793,
+      "duration_s_actual": 11284.79344534874
+    },
+    {
+      "distance_m": 17000,
+      "duration_s_planned": 15071.313563913911,
+      "duration_s_actual": 11944.559651613235
+    },
+    {
+      "distance_m": 18000,
+      "duration_s_planned": 15773.742950866577,
+      "duration_s_actual": 12569.245258569717
+    },
+    {
+      "distance_m": 19000,
+      "duration_s_planned": 16530.914261622038,
+      "duration_s_actual": 13263.21935415268
+    },
+    {
+      "distance_m": 20000,
+      "duration_s_planned": 17351.09213427071,
+      "duration_s_actual": 14059.909777879715
+    },
+    {
+      "distance_m": 21000,
+      "duration_s_planned": 18414.31467170163,
+      "duration_s_actual": 15165.50922703743
+    },
+    {
+      "distance_m": 22000,
+      "duration_s_planned": 19313.39926925252,
+      "duration_s_actual": 16667.17399096489
+    },
+    {
+      "distance_m": 23000,
+      "duration_s_planned": 19655.212329977254,
+      "duration_s_actual": 17606.051439762115
+    },
+    {
+      "distance_m": 24000,
+      "duration_s_planned": 20002.85917241567,
+      "duration_s_actual": 18736.313952684402
+    },
+    {
+      "distance_m": 25000,
+      "duration_s_planned": 20701.573869817512,
+      "duration_s_actual": 19903.062542438507
+    },
+    {
+      "distance_m": 26000,
+      "duration_s_planned": 21094.68895339598,
+      "duration_s_actual": 20857.795194625854
+    },
+    {
+      "distance_m": 27000,
+      "duration_s_planned": 21415.488478062955,
+      "duration_s_actual": 21552.278974294662
+    },
+    {
+      "distance_m": 28000,
+      "duration_s_planned": 21986.546771182897,
+      "duration_s_actual": 22554.997498989105
+    },
+    {
+      "distance_m": 29000,
+      "duration_s_planned": 23752.81166070238,
+      "duration_s_actual": 24117.255328416824
+    },
+    {
+      "distance_m": 30000,
+      "duration_s_planned": 24728.755545626027,
+      "duration_s_actual": 25619.618013381958
+    },
+    {
+      "distance_m": 31000,
+      "duration_s_planned": 25138.815849029546,
+      "duration_s_actual": 26806.686455011368
+    },
+    {
+      "distance_m": 32000,
+      "duration_s_planned": 25471.521734132995,
+      "duration_s_actual": 27390.40761423111
+    },
+    {
+      "distance_m": 33000,
+      "duration_s_planned": 26104.571988605363,
+      "duration_s_actual": 28092.56083536148
+    },
+    {
+      "distance_m": 34000,
+      "duration_s_planned": 27048.44179722135,
+      "duration_s_actual": 28968.499505758286
+    },
+    {
+      "distance_m": 35000,
+      "duration_s_planned": 28322.550444846893,
+      "duration_s_actual": 30030.54761815071
+    },
+    {
+      "distance_m": 36000,
+      "duration_s_planned": 29479.67818541331,
+      "duration_s_actual": 30986.26297068596
+    },
+    {
+      "distance_m": 37000,
+      "duration_s_planned": 30806.815460653535,
+      "duration_s_actual": 32341.290298700333
+    },
+    {
+      "distance_m": 38000,
+      "duration_s_planned": 32254.199181985095,
+      "duration_s_actual": 33628.22838330269
+    },
+    {
+      "distance_m": 39000,
+      "duration_s_planned": 33329.80892867638,
+      "duration_s_actual": 34783.79559779167
+    },
+    {
+      "distance_m": 40000,
+      "duration_s_planned": 34402.65685956785,
+      "duration_s_actual": 35617.84230470657
+    },
+    {
+      "distance_m": 41000,
+      "duration_s_planned": 35453.94060159548,
+      "duration_s_actual": 36525.42517209053
+    },
+    {
+      "distance_m": 42000,
+      "duration_s_planned": 36739.44739413188,
+      "duration_s_actual": 37928.909635305405
+    },
+    {
+      "distance_m": 43000,
+      "duration_s_planned": 37183.15985385776,
+      "duration_s_actual": 38411.115924835205
+    },
+    {
+      "distance_m": 44000,
+      "duration_s_planned": 37559.448703351496,
+      "duration_s_actual": 38791.158730983734
+    },
+    {
+      "distance_m": 45000,
+      "duration_s_planned": 37941.1057075613,
+      "duration_s_actual": 39767.44271183014
+    },
+    {
+      "distance_m": 46000,
+      "duration_s_planned": 38374.52532610425,
+      "duration_s_actual": 40326.173973083496
+    },
+    {
+      "distance_m": 47000,
+      "duration_s_planned": 39278.65752938103,
+      "duration_s_actual": 41170.03444504738
+    },
+    {
+      "distance_m": 48000,
+      "duration_s_planned": 39921.37465216669,
+      "duration_s_actual": 42029.25853776932
+    },
+    {
+      "distance_m": 49000,
+      "duration_s_planned": 40789.367612274444,
+      "duration_s_actual": 42859.2904548645
+    },
+    {
+      "distance_m": 50000,
+      "duration_s_planned": 41810.94036593442,
+      "duration_s_actual": 44340.200093746185
+    },
+    {
+      "distance_m": 51000,
+      "duration_s_planned": 42169.81422319708,
+      "duration_s_actual": 44999.5504655838
+    },
+    {
+      "distance_m": 52000,
+      "duration_s_planned": 42608.980382481415,
+      "duration_s_actual": 45648.66664123535
+    },
+    {
+      "distance_m": 53000,
+      "duration_s_planned": 43118.82021681543,
+      "duration_s_actual": 46482.50073266029
+    },
+    {
+      "distance_m": 54000,
+      "duration_s_planned": 43776.487485035424,
+      "duration_s_actual": 47361.22259926796
+    },
+    {
+      "distance_m": 55000,
+      "duration_s_planned": 45638.38181822799,
+      "duration_s_actual": 48792.12448334694
+    },
+    {
+      "distance_m": 56000,
+      "duration_s_planned": 46435.405071404,
+      "duration_s_actual": 50359.22179722786
+    },
+    {
+      "distance_m": 57000,
+      "duration_s_planned": 46856.318299320264,
+      "duration_s_actual": 51268.125361442566
+    },
+    {
+      "distance_m": 58000,
+      "duration_s_planned": 47284.86077981047,
+      "duration_s_actual": 51972.0993874073
+    },
+    {
+      "distance_m": 59000,
+      "duration_s_planned": 48329.725318007855,
+      "duration_s_actual": 52824.00142478943
+    },
+    {
+      "distance_m": 60000,
+      "duration_s_planned": 49348.21972241597,
+      "duration_s_actual": 53907.90638399124
+    },
+    {
+      "distance_m": 61000,
+      "duration_s_planned": 49848.44162825185,
+      "duration_s_actual": 54430.537132024765
+    },
+    {
+      "distance_m": 62000,
+      "duration_s_planned": 50342.18425603705,
+      "duration_s_actual": 54976.8009083271
+    },
+    {
+      "distance_m": 63000,
+      "duration_s_planned": 50828.47993122236,
+      "duration_s_actual": 55536.97146463394
+    },
+    {
+      "distance_m": 64000,
+      "duration_s_planned": 51674.38535034553,
+      "duration_s_actual": 56055.86840701103
+    },
+    {
+      "distance_m": 65000,
+      "duration_s_planned": 52194.77301690146,
+      "duration_s_actual": 57064.02445435524
+    },
+    {
+      "distance_m": 66000,
+      "duration_s_planned": 52906.20190081462,
+      "duration_s_actual": 58116.54626393318
+    },
+    {
+      "distance_m": 67000,
+      "duration_s_planned": 53396.03103129023,
+      "duration_s_actual": 59152.644119501114
+    },
+    {
+      "distance_m": 68000,
+      "duration_s_planned": 53881.67225868141,
+      "duration_s_actual": 59570.955318689346
+    },
+    {
+      "distance_m": 69000,
+      "duration_s_planned": 54299.34027170706,
+      "duration_s_actual": 60153.51241326332
+    },
+    {
+      "distance_m": 70000,
+      "duration_s_planned": 54677.54876602062,
+      "duration_s_actual": 60782.63719892502
+    },
+    {
+      "distance_m": 71000,
+      "duration_s_planned": 55122.233254593244,
+      "duration_s_actual": 61634.09034180641
+    },
+    {
+      "distance_m": 72000,
+      "duration_s_planned": 55749.618509031345,
+      "duration_s_actual": 62479.21859240532
+    },
+    {
+      "distance_m": 73000,
+      "duration_s_planned": 56243.201633870085,
+      "duration_s_actual": 63085.9144423008
+    },
+    {
+      "distance_m": 74000,
+      "duration_s_planned": 56713.36755357432,
+      "duration_s_actual": 63568.883533239365
+    },
+    {
+      "distance_m": 75000,
+      "duration_s_planned": 57370.749310665095,
+      "duration_s_actual": 64186.249572753906
+    },
+    {
+      "distance_m": 76000,
+      "duration_s_planned": 58006.530041433376,
+      "duration_s_actual": 64720.91390538216
+    },
+    {
+      "distance_m": 77000,
+      "duration_s_planned": 62308.85669935568,
+      "duration_s_actual": 67036.02966475487
+    },
+    {
+      "distance_m": 78000,
+      "duration_s_planned": 63390.301290111754,
+      "duration_s_actual": 68080.44294285774
+    },
+    {
+      "distance_m": 79000,
+      "duration_s_planned": 64718.992789228236,
+      "duration_s_actual": 69360.13817238808
+    },
+    {
+      "distance_m": 80000,
+      "duration_s_planned": 66227.74176071664,
+      "duration_s_actual": 70515.70318245888
+    },
+    {
+      "distance_m": 81000,
+      "duration_s_planned": 68231.58822657935,
+      "duration_s_actual": 73205.15631747246
+    },
+    {
+      "distance_m": 82000,
+      "duration_s_planned": 69441.9534473591,
+      "duration_s_actual": 74024.05627465248
+    },
+    {
+      "distance_m": 83000,
+      "duration_s_planned": 70562.50322292598,
+      "duration_s_actual": 74945.92892718315
+    },
+    {
+      "distance_m": 84000,
+      "duration_s_planned": 71614.5809077321,
+      "duration_s_actual": 75887.37929224968
+    },
+    {
+      "distance_m": 85000,
+      "duration_s_planned": 72510.23419328137,
+      "duration_s_actual": 76907.59653615952
+    },
+    {
+      "distance_m": 86000,
+      "duration_s_planned": 72988.13499095538,
+      "duration_s_actual": 78856.74716949463
+    },
+    {
+      "distance_m": 87000,
+      "duration_s_planned": 73532.4306535917,
+      "duration_s_actual": 79568.92839288712
+    },
+    {
+      "distance_m": 88000,
+      "duration_s_planned": 74048.59211708512,
+      "duration_s_actual": 80292.47457098961
+    },
+    {
+      "distance_m": 89000,
+      "duration_s_planned": 74426.70863933695,
+      "duration_s_actual": 81254.10148906708
+    },
+    {
+      "distance_m": 90000,
+      "duration_s_planned": 74943.89494595652,
+      "duration_s_actual": 82298.992790699
+    },
+    {
+      "distance_m": 91000,
+      "duration_s_planned": 75752.1488551044,
+      "duration_s_actual": 83186.0081140995
+    },
+    {
+      "distance_m": 92000,
+      "duration_s_planned": 76601.49981700619,
+      "duration_s_actual": 84038.16637945175
+    },
+    {
+      "distance_m": 93000,
+      "duration_s_planned": 77470.65995102063,
+      "duration_s_actual": 85138.96637558937
+    },
+    {
+      "distance_m": 94000,
+      "duration_s_planned": 78031.7732199703,
+      "duration_s_actual": 85959.60173392296
+    },
+    {
+      "distance_m": 95000,
+      "duration_s_planned": 78726.55388283078,
+      "duration_s_actual": 86784.48947501183
+    },
+    {
+      "distance_m": 96000,
+      "duration_s_planned": 79601.31322641311,
+      "duration_s_actual": 87696.3427901268
+    },
+    {
+      "distance_m": 97000,
+      "duration_s_planned": 80294.72218157763,
+      "duration_s_actual": 88294.63538503647
+    },
+    {
+      "distance_m": 98000,
+      "duration_s_planned": 81134.68765048185,
+      "duration_s_actual": 89668.92228007317
+    },
+    {
+      "distance_m": 99000,
+      "duration_s_planned": 82861.61569838556,
+      "duration_s_actual": 90936.8158929348
+    },
+    {
+      "distance_m": 100000,
+      "duration_s_planned": 84869.7082762986,
+      "duration_s_actual": 92246.31901216507
+    },
+    {
+      "distance_m": 101000,
+      "duration_s_planned": 86117.63088194009,
+      "duration_s_actual": 93530.94509029388
+    },
+    {
+      "distance_m": 102000,
+      "duration_s_planned": 88405.8278573952,
+      "duration_s_actual": 95156.94483113289
+    },
+    {
+      "distance_m": 103000,
+      "duration_s_planned": 90705.36388572818,
+      "duration_s_actual": 96787.89222073555
+    },
+    {
+      "distance_m": 104000,
+      "duration_s_planned": 91115.40538884704,
+      "duration_s_actual": 98033.49844670296
+    },
+    {
+      "distance_m": 105000,
+      "duration_s_planned": 91612.54548449825,
+      "duration_s_actual": 98854.67581295967
+    },
+    {
+      "distance_m": 106000,
+      "duration_s_planned": 92704.03403751522,
+      "duration_s_actual": 99809.10995006561
+    },
+    {
+      "distance_m": 107000,
+      "duration_s_planned": 93344.61133256755,
+      "duration_s_actual": 100637.85021924973
+    },
+    {
+      "distance_m": 108000,
+      "duration_s_planned": 93761.33367421057,
+      "duration_s_actual": 101337.7357583046
+    },
+    {
+      "distance_m": 109000,
+      "duration_s_planned": 94207.09089534162,
+      "duration_s_actual": 102069.96369457245
+    },
+    {
+      "distance_m": 110000,
+      "duration_s_planned": 94587.65654186872,
+      "duration_s_actual": 102751.47461438179
+    },
+    {
+      "distance_m": 111000,
+      "duration_s_planned": 95066.17030179575,
+      "duration_s_actual": 103387.11168336868
+    },
+    {
+      "distance_m": 112000,
+      "duration_s_planned": 95513.45068625997,
+      "duration_s_actual": 104101.32589197159
+    },
+    {
+      "distance_m": 113000,
+      "duration_s_planned": 95994.94080279364,
+      "duration_s_actual": 105071.62354063988
+    },
+    {
+      "distance_m": 114000,
+      "duration_s_planned": 97256.11494298445,
+      "duration_s_actual": 107151.89101576805
+    },
+    {
+      "distance_m": 115000,
+      "duration_s_planned": 97882.58736384173,
+      "duration_s_actual": 107947.0387442112
+    },
+    {
+      "distance_m": 116000,
+      "duration_s_planned": 99050.9492521667,
+      "duration_s_actual": 108939.89840888977
+    },
+    {
+      "distance_m": 117000,
+      "duration_s_planned": 100243.21421523421,
+      "duration_s_actual": 110088.8894507885
+    },
+    {
+      "distance_m": 118000,
+      "duration_s_planned": 101821.46323725041,
+      "duration_s_actual": 111800.20573997498
+    },
+    {
+      "distance_m": 119000,
+      "duration_s_planned": 103286.2515279609,
+      "duration_s_actual": 112853.38463497162
+    },
+    {
+      "distance_m": 120000,
+      "duration_s_planned": 104612.88083436881,
+      "duration_s_actual": 113867.31983733177
+    },
+    {
+      "distance_m": 121000,
+      "duration_s_planned": 105988.30719504233,
+      "duration_s_actual": 114889.64760875702
+    },
+    {
+      "distance_m": 122000,
+      "duration_s_planned": 106786.00699387866,
+      "duration_s_actual": 116216.67416191101
+    },
+    {
+      "distance_m": 123000,
+      "duration_s_planned": 107170.34338385743,
+      "duration_s_actual": 117946.11798381805
+    },
+    {
+      "distance_m": 124000,
+      "duration_s_planned": 107578.6611218768,
+      "duration_s_actual": 118677.50370073318
+    },
+    {
+      "distance_m": 125000,
+      "duration_s_planned": 108037.2873764274,
+      "duration_s_actual": 119374.50790405273
+    },
+    {
+      "distance_m": 126000,
+      "duration_s_planned": 108415.43986103145,
+      "duration_s_actual": 120381.6627266407
+    },
+    {
+      "distance_m": 127000,
+      "duration_s_planned": 108775.2156711696,
+      "duration_s_actual": 121241.867841959
+    },
+    {
+      "distance_m": 128000,
+      "duration_s_planned": 109140.68686956479,
+      "duration_s_actual": 122001.53826522827
+    },
+    {
+      "distance_m": 129000,
+      "duration_s_planned": 109634.72467474181,
+      "duration_s_actual": 122740.95013237
+    },
+    {
+      "distance_m": 130000,
+      "duration_s_planned": 110342.01299026365,
+      "duration_s_actual": 123401.28354716301
+    },
+    {
+      "distance_m": 131000,
+      "duration_s_planned": 111159.90734789413,
+      "duration_s_actual": 124046.47593975067
+    },
+    {
+      "distance_m": 132000,
+      "duration_s_planned": 115619.21025001189,
+      "duration_s_actual": 127236.61736249924
+    },
+    {
+      "distance_m": 133000,
+      "duration_s_planned": 116466.5513819605,
+      "duration_s_actual": 128075.91778421402
+    },
+    {
+      "distance_m": 134000,
+      "duration_s_planned": 117334.63945466254,
+      "duration_s_actual": 129062.41064596176
+    },
+    {
+      "distance_m": 135000,
+      "duration_s_planned": 118638.17880812263,
+      "duration_s_actual": 130381.38567733765
+    },
+    {
+      "distance_m": 136000,
+      "duration_s_planned": 120043.15899851173,
+      "duration_s_actual": 131497.7531223297
+    },
+    {
+      "distance_m": 137000,
+      "duration_s_planned": 121060.61874641261,
+      "duration_s_actual": 132544.52959609032
+    },
+    {
+      "distance_m": 138000,
+      "duration_s_planned": 122488.04513998223,
+      "duration_s_actual": 134014.46829771996
+    },
+    {
+      "distance_m": 139000,
+      "duration_s_planned": 123442.38177682224,
+      "duration_s_actual": 135077.5036895275
+    },
+    {
+      "distance_m": 140000,
+      "duration_s_planned": 124597.73792590237,
+      "duration_s_actual": 136043.91419053078
+    },
+    {
+      "distance_m": 141000,
+      "duration_s_planned": 125137.07727912386,
+      "duration_s_actual": 136852.29365587234
+    },
+    {
+      "distance_m": 142000,
+      "duration_s_planned": 125926.85022622818,
+      "duration_s_actual": 137652.85836172104
+    },
+    {
+      "distance_m": 143000,
+      "duration_s_planned": 126793.71398383386,
+      "duration_s_actual": 138444.75230288506
+    },
+    {
+      "distance_m": 144000,
+      "duration_s_planned": 127743.13685591331,
+      "duration_s_actual": 140711.6752011776
+    },
+    {
+      "distance_m": 145000,
+      "duration_s_planned": 129187.43517462829,
+      "duration_s_actual": 141998.9504659176
+    },
+    {
+      "distance_m": 146000,
+      "duration_s_planned": 130358.0308728282,
+      "duration_s_actual": 143122.25848150253
+    },
+    {
+      "distance_m": 147000,
+      "duration_s_planned": 131636.45211281147,
+      "duration_s_actual": 144880.6503341198
+    },
+    {
+      "distance_m": 148000,
+      "duration_s_planned": 132670.9532708978,
+      "duration_s_actual": 146247.75376272202
+    },
+    {
+      "distance_m": 149000,
+      "duration_s_planned": 133927.67713858996,
+      "duration_s_actual": 147778.59656596184
+    },
+    {
+      "distance_m": 150000,
+      "duration_s_planned": 135015.35583314885,
+      "duration_s_actual": 149707.3478126526
+    },
+    {
+      "distance_m": 151000,
+      "duration_s_planned": 136091.97878734808,
+      "duration_s_actual": 150960.92737603188
+    },
+    {
+      "distance_m": 152000,
+      "duration_s_planned": 137980.37206809552,
+      "duration_s_actual": 152905.70248556137
+    },
+    {
+      "distance_m": 153000,
+      "duration_s_planned": 138417.29548792448,
+      "duration_s_actual": 154293.59536504745
+    },
+    {
+      "distance_m": 154000,
+      "duration_s_planned": 138866.30796093514,
+      "duration_s_actual": 156031.25304031372
+    },
+    {
+      "distance_m": 155000,
+      "duration_s_planned": 139225.69894320384,
+      "duration_s_actual": 158094.5703780651
+    },
+    {
+      "distance_m": 156000,
+      "duration_s_planned": 139707.30620238464,
+      "duration_s_actual": 159511.35737657547
+    },
+    {
+      "distance_m": 157000,
+      "duration_s_planned": 140171.95654951446,
+      "duration_s_actual": 160722.66628313065
+    },
+    {
+      "distance_m": 158000,
+      "duration_s_planned": 141254.3569300252,
+      "duration_s_actual": 161879.9120812416
+    },
+    {
+      "distance_m": 159000,
+      "duration_s_planned": 142382.4657457722,
+      "duration_s_actual": 162860.42662882805
+    },
+    {
+      "distance_m": 160000,
+      "duration_s_planned": 143212.35869759566,
+      "duration_s_actual": 163592.06508421898
+    },
+    {
+      "distance_m": 161000,
+      "duration_s_planned": 144490.38455290894,
+      "duration_s_actual": 165767.27246189117
+    },
+    {
+      "distance_m": 162000,
+      "duration_s_planned": 145450.12869551923,
+      "duration_s_actual": 175557.01913499832
+    },
+    {
+      "distance_m": 163000,
+      "duration_s_planned": 145885.23707386805,
+      "duration_s_actual": 175557.1349043846
+    },
+    {
+      "distance_m": 164000,
+      "duration_s_planned": 146434.97693265002,
+      "duration_s_actual": 175557.2506737709
+    },
+    {
+      "distance_m": 165000,
+      "duration_s_planned": 146928.4484134864,
+      "duration_s_actual": 175557.3664431572
+    },
+    {
+      "distance_m": 166000,
+      "duration_s_planned": 147429.4392539315,
+      "duration_s_actual": 175557.4822125435
+    },
+    {
+      "distance_m": 167000,
+      "duration_s_planned": 147843.80800227722,
+      "duration_s_actual": 175557.59798192978
+    },
+    {
+      "distance_m": 168000,
+      "duration_s_planned": 148269.26898035035,
+      "duration_s_actual": 175557.71375131607
+    },
+    {
+      "distance_m": 169000,
+      "duration_s_planned": 148731.27381248068,
+      "duration_s_actual": 175557.82952070236
+    },
+    {
+      "distance_m": 170000,
+      "duration_s_planned": 149184.12170953423,
+      "duration_s_actual": 175557.94529032707
+    },
+    {
+      "distance_m": 171000,
+      "duration_s_planned": 149689.21129051686,
+      "duration_s_actual": 176434.05570793152
+    },
+    {
+      "distance_m": 172000,
+      "duration_s_planned": 150241.78234436395,
+      "duration_s_actual": 177706.15661501884
+    },
+    {
+      "distance_m": 173000,
+      "duration_s_planned": 150941.01099925602,
+      "duration_s_actual": 178581.05791974068
+    }
+  ],
+  "deviations": [
+    {
+      "distance_m_left": 85823.96450804126,
+      "distance_m_rejoined": 85965.03576195338,
+      "duration_s_left": 77920,
+      "duration_s": 845,
+      "distance_m": 413.34999999999127,
+      "offset_m_max": 192.26476602463478
+    },
+    {
+      "distance_m_left": 122947.4894349926,
+      "distance_m_rejoined": 123392.55547176527,
+      "duration_s_left": 117602,
+      "duration_s": 346,
+      "distance_m": 439.7800000000134,
+      "offset_m_max": 154.64956236189744
+    },
+    {
+      "distance_m_left": 149882.33970539022,
+      "distance_m_rejoined": 150220.62614668487,
+      "duration_s_left": 149381,
+      "duration_s": 328,
+      "distance_m": 245.13999999998487,
+      "offset_m_max": 134.89440927940882
+    },
+    {
+      "distance_m_left": 161834.71426513031,
+      "distance_m_rejoined": 170472.57559185557,
+      "duration_s_left": 166612,
+      "duration_s": 8947,
+      "distance_m": 8899.279999999999,
+      "offset_m_max": 1221.2035389098223
+    },
+    {
+      "distance_m_left": 172365.96181489693,
+      "distance_m_rejoined": 172681.49201493716,
+      "duration_s_left": 178061,
+      "duration_s": 187,
+      "distance_m": 236.61999999999534,
+      "offset_m_max": 109.3145357204085
+    }
+  ],
+  "calibration": {
+    "sections_used": 13,
+    "sections_off_route": 1,
+    "pace_base_s_per_km": 471.76286397408546,
+    "fatigue_coefficient": 0.003455981441941716,
+    "life_base_stop_s": 2094,
+    "checkpoint_stop_s": 420,
+    "duration_s_replanned": [
+      0,
+      13507.882296464908,
+      24622.34001701422,
+      33060.494655954615,
+      38893.65043210577,
+      43855.21763456263,
+      54392.730060987386,
+      61509.30388026755,
+      83584.45396993215,
+      102081.79942295866,
+      120708.08666680678,
+      137212.5751460168,
+      146353.2523554088,
+      156720.39837925497,
+      166692.06679930267
+    ],
+    "error_s_rms_planned": 11700.396620778585,
+    "error_s_rms_replanned": 4421.314547413056,
+    "error_s_max_planned": 27684.527755271964,
+    "error_s_max_replanned": 12136.933200697327
+  }
+}

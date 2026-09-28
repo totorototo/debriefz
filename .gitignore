@@ -1,0 +1,21 @@
+# Zig build artifacts and fetched dependencies
+.zig-cache/
+zig-out/
+zig-pkg/
+
+# Recordings and routes you make yourself hold GPS tracks and health data, so don't commit
+# them. Deliberately small test fixtures can still go in testdata/.
+*.fit
+*.FIT
+*.gpx
+!testdata/**/*.fit
+!testdata/**/*.gpx
+
+# Claude Code per-user settings
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp

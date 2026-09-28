@@ -1,0 +1,21 @@
+.{
+    .name = .debriefz,
+    .version = "0.1.0",
+    .fingerprint = 0xa566ead50d7912e8,
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .gpxz = .{
+            .url = "git+https://github.com/totorototo/gpxz#c0d148b3752e9b3ea51a648e621522c0218b23bb",
+            .hash = "gpxz-0.1.0-euMO4hGhBAB-fU5fqd_DYqj0SVYTVfh0fivA-Jo8vPZz",
+        },
+        .fitz = .{
+            .url = "git+https://github.com/totorototo/fitz#2320c39dd08a285121431b61a55957fa91ea76cf",
+            .hash = "fitz-0.1.0-K1sZO0o4CAA0VyNpLxE0WnIcdZ4fJXBFoZfw7uQ6W896",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
