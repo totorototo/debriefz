@@ -92,6 +92,8 @@ pub const Deviation = struct {
 };
 
 pub const Climb = struct {
+    /// Along the plan, from the first checkpoint, as every other distance in the report:
+    /// negative for a climb that starts on a lead-in before it.
     distance_m_start: f64,
     distance_m: f64,
     elevation_gain_m: f64,
@@ -400,6 +402,8 @@ fn sections_compute(
 
 fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Climb {
     const trace = &context.data.trace;
+    // gpxz places climbs along the trace; the report counts from the first checkpoint.
+    const origin_m = context.trace_distance_m(context.plan[0].index);
     const durations = context.timeline.duration_s_arrival;
     const climbs = try allocator.alloc(Climb, trace.climbs.len);
     for (trace.climbs, climbs) |*source, *climb| {
@@ -410,7 +414,7 @@ fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Clim
         const end = context.duration_s_at(context.trace_distance_m(source.index_end), 0);
         const actual_s: ?f64 = if (start != null and end != null) end.? - start.? else null;
         climb.* = .{
-            .distance_m_start = source.distance_m_start,
+            .distance_m_start = source.distance_m_start - origin_m,
             .distance_m = source.distance_m,
             .elevation_gain_m = source.elevation_gain_m,
             .gradient_percent_average = source.gradient_percent_average,
@@ -427,6 +431,11 @@ fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Clim
                 context.epoch_s_origin + end.?,
             ) else null,
         };
+    }
+    // Paired with gpxz: each climb starts where its first trace point lies, less the origin.
+    for (trace.climbs, climbs) |*source, *climb| {
+        const start_m = context.trace_distance_m(source.index_start) - origin_m;
+        assert(@abs(climb.distance_m_start - start_m) < 1e-6);
     }
     assert(climbs.len == trace.climbs.len);
     return climbs;

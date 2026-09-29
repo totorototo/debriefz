@@ -231,6 +231,93 @@ fn expect_series_runner(
     try testing.expectEqual(@as(f64, 0), track[0].duration_s);
 }
 
+/// A route whose start checkpoint lies 1 km into the trace: a descending lead-in, a 2 km
+/// climb at 8 %, and a descent to the arrival. The caller owns the result.
+fn lead_in_gpx(allocator: std.mem.Allocator) ![]u8 {
+    var gpx: std.ArrayList(u8) = .empty;
+    errdefer gpx.deinit(allocator);
+    const step_degrees = 0.0005; // About 55.6 m of latitude.
+    const lead_in = 18;
+    const climb = 36;
+    const count = lead_in + 2 * climb + 1;
+    try gpx.appendSlice(allocator,
+        \\<?xml version="1.0" encoding="UTF-8"?>
+        \\<gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
+        \\<metadata><name>Lead-in</name></metadata>
+        \\
+    );
+    const waypoints = [_]struct { index: usize, name: []const u8, type_name: []const u8 }{
+        .{ .index = lead_in, .name = "Start", .type_name = "Start" },
+        .{ .index = count - 1, .name = "Arrival", .type_name = "Arrival" },
+    };
+    for (waypoints) |waypoint| {
+        try gpx.print(allocator,
+            \\<wpt lat="{d:.6}" lon="0.100000"><name>{s}</name><type>{s}</type></wpt>
+            \\
+        , .{
+            45.0 + step_degrees * @as(f64, @floatFromInt(waypoint.index)),
+            waypoint.name,
+            waypoint.type_name,
+        });
+    }
+    try gpx.appendSlice(allocator, "<trk><trkseg>\n");
+    for (0..count) |index| {
+        const elevation_m: f64 = if (index <= lead_in)
+            1100 - 50 * @as(f64, @floatFromInt(index)) / lead_in
+        else if (index <= lead_in + climb)
+            1050 + 160 * @as(f64, @floatFromInt(index - lead_in)) / climb
+        else
+            1210 - 160 * @as(f64, @floatFromInt(index - lead_in - climb)) / climb;
+        const latitude = 45.0 + step_degrees * @as(f64, @floatFromInt(index));
+        try gpx.print(allocator,
+            \\<trkpt lat="{d:.6}" lon="0.100000"><ele>{d:.1}</ele></trkpt>
+            \\
+        , .{ latitude, elevation_m });
+    }
+    try gpx.appendSlice(allocator, "</trkseg></trk></gpx>\n");
+    return gpx.toOwnedSlice(allocator);
+}
+
+test "a lead-in before the start: climbs count from the start checkpoint, as gpxz's plan" {
+    const allocator = testing.allocator;
+    const gpx = try lead_in_gpx(allocator);
+    defer allocator.free(gpx);
+    const settings: gpxz.Settings = .{};
+    var data = try gpxz.parse(allocator, gpx, &settings);
+    defer data.deinit(allocator);
+    const plan = data.plan.?;
+    const origin_m = data.trace.distances_m_cumulative[plan[0].index];
+    // The start checkpoint sits about 1 km into the trace, where gpxz's plan counts from.
+    try testing.expectApproxEqAbs(@as(f64, 1000), origin_m, 5);
+    try testing.expectEqual(@as(f64, 0), plan[0].distance_m);
+    try testing.expect(data.trace.climbs.len >= 1);
+
+    const knots = try runner_knots(allocator, &data, &settings);
+    defer allocator.free(knots);
+    const samples = try runner_samples(allocator, knots);
+    defer allocator.free(samples);
+    var activity: debriefz.Activity = .{
+        .samples = samples,
+        .records_without_position = 0,
+        .session = .{},
+        .utc_offset_s = null,
+    };
+    var match = try debriefz.match.match(allocator, &data.trace, activity.samples, &.{});
+    defer match.deinit(allocator);
+    var report = try debriefz.compare.compare(allocator, &data, &settings, &activity, &match, &.{});
+    defer report.deinit(allocator);
+
+    // Expected from gpxz alone: its climb, less its plan's origin.
+    try testing.expectEqual(data.trace.climbs.len, report.climbs.len);
+    for (data.trace.climbs, report.climbs) |*source, *climb| {
+        const expected_m = source.distance_m_start - origin_m;
+        try testing.expectApproxEqAbs(expected_m, climb.distance_m_start, 1e-6);
+        try testing.expect(climb.distance_m_start < report.totals.distance_m_planned);
+    }
+    // And on the same axis as the profile, which starts at the start checkpoint.
+    try testing.expectEqual(@as(f64, 0), report.profile[0].distance_m);
+}
+
 fn planned_stops_before(plan: []const gpxz.PlanEntry, entry: *const gpxz.PlanEntry) f64 {
     assert(plan.len > 0);
     var stops_s: f64 = 0;
