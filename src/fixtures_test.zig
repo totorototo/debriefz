@@ -168,6 +168,8 @@ test "grp-160: a runner 10 % off the plan is measured and calibrated as such" {
         try testing.expect(split.duration_s_planned >= previous.duration_s_planned);
         try testing.expect(split.duration_s_actual.? >= previous.duration_s_actual.?);
     }
+    try expect_series_runner(&report, plan, samples.len);
+
     // Every climb was run, and planned: the runner's time on each is known.
     try testing.expect(report.climbs.len > 0);
     for (report.climbs) |*climb| {
@@ -185,6 +187,48 @@ test "grp-160: a runner 10 % off the plan is measured and calibrated as such" {
     const finish_s = report.totals.duration_s_actual.?;
     try testing.expect(calibration.error_s_max_replanned < 0.02 * finish_s);
     try testing.expect(calibration.error_s_rms_replanned < calibration.error_s_rms_planned);
+}
+
+/// The profile and the track of the synthetic runner, from its recipe: every point reached
+/// on both clocks, 140 bpm throughout, never off route, and the finish where gpxz puts it.
+fn expect_series_runner(
+    report: *const debriefz.Report,
+    plan: []const gpxz.PlanEntry,
+    samples_count: usize,
+) !void {
+    assert(plan.len >= 2);
+    const profile = report.profile;
+    const length_m = report.totals.distance_m_planned;
+    const steps: usize = @intFromFloat(@floor(length_m / 100));
+    try testing.expect(profile.len == steps + 1 or profile.len == steps + 2);
+    try testing.expectEqual(@as(f64, 0), profile[0].distance_m);
+    try testing.expectApproxEqAbs(length_m, profile[profile.len - 1].distance_m, 1e-6);
+    for (profile[1..], profile[0 .. profile.len - 1]) |*point, *previous| {
+        try testing.expect(point.distance_m > previous.distance_m);
+        try testing.expect(point.duration_s_planned >= previous.duration_s_planned);
+        try testing.expect(point.duration_s_actual.? >= previous.duration_s_actual.?);
+        const heart_rate = point.heart_rate_bpm_average orelse continue;
+        try testing.expectEqual(@as(f64, 140), heart_rate);
+    }
+    const finish = &profile[profile.len - 1];
+    const last = &plan[plan.len - 1];
+    try testing.expectApproxEqAbs(last.duration_s_arrival, finish.duration_s_planned, 1e-6);
+    const moving_s = last.duration_s_arrival - planned_stops_before(plan, last);
+    var life_bases: f64 = 0;
+    for (plan) |*entry| {
+        if (entry.stop_s > 0) life_bases += 1;
+    }
+    const expected_s = runner_pace_ratio * moving_s + life_bases * runner_life_base_stop_s;
+    try testing.expectApproxEqAbs(expected_s, finish.duration_s_actual.?, 15);
+
+    // A point every 50 to 50 + one sample's worth of meters, the runner never off route.
+    const track = report.track;
+    try testing.expect(track.len <= samples_count);
+    const count_min: usize = @intFromFloat(@floor(length_m / 80));
+    const count_max: usize = @intFromFloat(@ceil(length_m / 50) + 2);
+    try testing.expect(track.len >= count_min and track.len <= count_max);
+    for (track) |*point| try testing.expect(point.on_route);
+    try testing.expectEqual(@as(f64, 0), track[0].duration_s);
 }
 
 fn planned_stops_before(plan: []const gpxz.PlanEntry, entry: *const gpxz.PlanEntry) f64 {
@@ -251,4 +295,12 @@ test "grp-160-2026.fit: arrivals agree with the SDK's, loops and out-and-backs i
         const tolerance_s: i64 = if (std.mem.eql(u8, checkpoint.name, "Hautacam")) 600 else 180;
         try testing.expect(difference_s >= 0 and difference_s <= tolerance_s);
     }
+
+    // The track keeps both ends of every stretch off route, so each deviation shows on it.
+    var stretches_off_route: usize = 0;
+    for (report.track[1..], report.track[0 .. report.track.len - 1]) |*point, *previous| {
+        if (previous.on_route and !point.on_route) stretches_off_route += 1;
+    }
+    try testing.expect(stretches_off_route >= report.deviations.len);
+    try testing.expect(report.track.len < activity.samples.len / 10);
 }

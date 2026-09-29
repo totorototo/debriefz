@@ -8,6 +8,7 @@ pub const match = @import("match.zig");
 pub const timeline = @import("timeline.zig");
 pub const actual = @import("actual.zig");
 pub const compare = @import("compare.zig");
+pub const series = @import("series.zig");
 pub const calibrate = @import("calibrate.zig");
 
 pub const Report = compare.Report;

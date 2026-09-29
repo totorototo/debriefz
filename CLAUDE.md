@@ -21,6 +21,8 @@ debriefz only connects the two: parsing and the pace model stay in those librari
   - `actual.zig`: queries on a matched activity (when a distance was first reached, stopped
     time, dwell at a checkpoint, heart rate, off-route distance).
   - `compare.zig`: the `Report`: checkpoints, sections, climbs, per-km splits, deviations.
+  - `series.zig`: the plan's profile every `profile_m` on both clocks, and the track thinned
+    to one point every `track_m` of odometer, for drawing the race.
   - `calibrate.zig`: fits pace and fatigue from the sections and reruns gpxz's plan with them.
 - `src/fixtures_test.zig` + `testdata/`: tests against real files, embedded by name (list them
   in `build.zig`). Expected values must come from outside debriefz (Garmin's FIT SDK, a

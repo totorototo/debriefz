@@ -22,7 +22,7 @@ Requires **Zig 0.16.0**.
 
 ```sh
 zig build run -- route.gpx activity.fit            # text report
-zig build run -- --json route.gpx activity.fit     # the same, as JSON (plus per-km splits)
+zig build run -- --json route.gpx activity.fit     # the same, as JSON (plus splits, profile, track)
 zig build run -- --pace 450 --fatigue 0.003 route.gpx activity.fit
 ```
 
@@ -118,6 +118,7 @@ src/match.zig           map matching, off-route deviations, odometer, stopped in
 src/timeline.zig        gpxz's plan at every trace point
 src/actual.zig          queries on the matched activity (arrivals, stops, heart rate)
 src/compare.zig         the Report: checkpoints, sections, climbs, splits, deviations
+src/series.zig          the plan's profile on both clocks, and the track thinned for a map
 src/calibrate.zig       fitted pace and fatigue, and gpxz's plan rerun with them
 src/main.zig            the CLI
 src/fixtures_test.zig   tests against the files in testdata/

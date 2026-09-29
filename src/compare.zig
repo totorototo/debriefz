@@ -15,6 +15,7 @@ const Actual = @import("actual.zig").Actual;
 const timeline_module = @import("timeline.zig");
 const Timeline = timeline_module.Timeline;
 const calibrate = @import("calibrate.zig");
+const series = @import("series.zig");
 
 pub const Settings = struct {
     /// Time spent within this distance of a checkpoint after reaching it is time at the
@@ -26,6 +27,10 @@ pub const Settings = struct {
     finish_tolerance_m: f64 = 150.0,
     /// Per-kilometer splits every this many meters.
     split_m: f64 = 1000.0,
+    /// A profile point every this many meters along the plan: fine enough to draw a climb.
+    profile_m: f64 = 100.0,
+    /// A track point every this many meters of odometer: fine enough for a map.
+    track_m: f64 = 50.0,
 };
 
 pub const CompareError = error{
@@ -141,6 +146,8 @@ pub const Report = struct {
     splits: []Split,
     deviations: []Deviation,
     calibration: ?calibrate.Calibration,
+    profile: []series.ProfilePoint,
+    track: []series.TrackPoint,
 
     pub fn deinit(self: *Report, allocator: std.mem.Allocator) void {
         allocator.free(self.deviations);
@@ -148,6 +155,8 @@ pub const Report = struct {
         allocator.free(self.sections);
         allocator.free(self.climbs);
         allocator.free(self.splits);
+        allocator.free(self.profile);
+        allocator.free(self.track);
         if (self.calibration) |*calibration| calibration.deinit(allocator);
         self.* = undefined;
     }
@@ -219,6 +228,30 @@ pub fn compare(
     errdefer allocator.free(splits);
     const deviations = try deviations_compute(allocator, &context, activity, match);
     errdefer allocator.free(deviations);
+    const span: series.Span = .{
+        .index_first = plan[0].index,
+        .index_last = plan[plan.len - 1].index,
+        .epoch_s_origin = epoch_s_origin,
+        .finish_tolerance_m = settings.finish_tolerance_m,
+    };
+    const profile = try series.profile(
+        allocator,
+        &data.trace,
+        &timeline,
+        &actual,
+        &span,
+        settings.profile_m,
+    );
+    errdefer allocator.free(profile);
+    const track = try series.track(
+        allocator,
+        activity.samples,
+        match,
+        start_m,
+        epoch_s_origin,
+        settings.track_m,
+    );
+    errdefer allocator.free(track);
     const calibration = try calibrate.compute(
         allocator,
         data,
@@ -238,9 +271,14 @@ pub fn compare(
         .splits = splits,
         .deviations = deviations,
         .calibration = calibration,
+        .profile = profile,
+        .track = track,
     };
     assert(report.checkpoints.len == plan.len);
     assert(report.sections.len == plan.len - 1);
+    // Paired with the finish checkpoint: the profile's end is reached by the same rule.
+    const finish = report.checkpoints[report.checkpoints.len - 1].duration_s_actual;
+    assert(std.meta.eql(finish, report.profile[report.profile.len - 1].duration_s_actual));
     return report;
 }
 
@@ -450,29 +488,12 @@ fn splits_compute(allocator: std.mem.Allocator, context: *const Context) ![]Spli
         assert(distances[index + 1] >= distance_m);
         split.* = .{
             .distance_m = distance_m - origin_m,
-            .duration_s_planned = planned_at(trace, context.timeline, index, distance_m),
+            .duration_s_planned = context.timeline.duration_s_at(trace, index, distance_m),
             .duration_s_actual = context.duration_s_at(distance_m, 0),
         };
     }
     assert(index <= index_last);
     return splits;
-}
-
-/// The planned race time at `distance_m`, between points `index` and `index + 1`.
-fn planned_at(
-    trace: *const gpxz.Trace,
-    timeline: *const Timeline,
-    index: usize,
-    distance_m: f64,
-) f64 {
-    const distances = trace.distances_m_cumulative;
-    assert(distances[index] <= distance_m and distance_m <= distances[index + 1]);
-    const durations = timeline.duration_s_arrival;
-    const span_m = distances[index + 1] - distances[index];
-    const fraction = if (span_m > 0) (distance_m - distances[index]) / span_m else 0.0;
-    assert(fraction >= 0 and fraction <= 1);
-    assert(durations[index + 1] >= durations[index]);
-    return durations[index] + fraction * (durations[index + 1] - durations[index]);
 }
 
 fn totals_compute(
@@ -541,26 +562,4 @@ test "margin_actual: the start has none, and a stop eats into the margin" {
     try testing.expectEqual(@as(?f64, null), margin_actual(&entry, null, 60, 3));
     entry.epoch_s_cutoff = null;
     try testing.expectEqual(@as(?f64, null), margin_actual(&entry, 9_000, 60, 3));
-}
-
-test "planned_at: interpolated between two points, and at both ends" {
-    const allocator = testing.allocator;
-    // Three points 0.001° of latitude apart, about 111 m each on gpxz's sphere.
-    const points = [_][3]f64{ .{ 45.0, 6.0, 0 }, .{ 45.001, 6.0, 0 }, .{ 45.002, 6.0, 0 } };
-    var trace = try gpxz.Trace.init(allocator, &points);
-    defer trace.deinit(allocator);
-    var durations = [_]f64{ 0, 100, 400 };
-    var efforts = [_]f64{ 0, 0, 0 };
-    const timeline: Timeline = .{
-        .duration_s_arrival = &durations,
-        .distance_km_effort = &efforts,
-    };
-    const distances = trace.distances_m_cumulative;
-
-    try testing.expectEqual(@as(f64, 0), planned_at(&trace, &timeline, 0, 0));
-    try testing.expectEqual(@as(f64, 100), planned_at(&trace, &timeline, 0, distances[1]));
-    try testing.expectEqual(@as(f64, 100), planned_at(&trace, &timeline, 1, distances[1]));
-    const middle_m = (distances[1] + distances[2]) / 2;
-    try testing.expectApproxEqAbs(@as(f64, 250), planned_at(&trace, &timeline, 1, middle_m), 1e-9);
-    try testing.expectEqual(@as(f64, 400), planned_at(&trace, &timeline, 1, distances[2]));
 }

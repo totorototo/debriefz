@@ -26,6 +26,24 @@ pub const Timeline = struct {
         allocator.free(self.distance_km_effort);
         self.* = undefined;
     }
+
+    /// The planned race time at `distance_m`, between points `index` and `index + 1`.
+    pub fn duration_s_at(
+        self: *const Timeline,
+        trace: *const gpxz.Trace,
+        index: usize,
+        distance_m: f64,
+    ) f64 {
+        const distances = trace.distances_m_cumulative;
+        assert(self.duration_s_arrival.len == distances.len);
+        assert(distances[index] <= distance_m and distance_m <= distances[index + 1]);
+        const durations = self.duration_s_arrival;
+        const span_m = distances[index + 1] - distances[index];
+        const fraction = if (span_m > 0) (distance_m - distances[index]) / span_m else 0.0;
+        assert(fraction >= 0 and fraction <= 1);
+        assert(durations[index + 1] >= durations[index]);
+        return durations[index] + fraction * (durations[index + 1] - durations[index]);
+    }
 };
 
 pub fn compute(
@@ -149,4 +167,26 @@ test "compute: agrees with the plan at every checkpoint and never goes back" {
     const efforts = timeline.distance_km_effort;
     const distance_km = data.trace.distances_m_cumulative[life_base.index] / 1000.0;
     try testing.expect(efforts[life_base.index] > distance_km);
+}
+
+test "Timeline.duration_s_at: interpolated between two points, and at both ends" {
+    const allocator = testing.allocator;
+    // Three points 0.001° of latitude apart, about 111 m each on gpxz's sphere.
+    const points = [_][3]f64{ .{ 45.0, 6.0, 0 }, .{ 45.001, 6.0, 0 }, .{ 45.002, 6.0, 0 } };
+    var trace = try gpxz.Trace.init(allocator, &points);
+    defer trace.deinit(allocator);
+    var durations = [_]f64{ 0, 100, 400 };
+    var efforts = [_]f64{ 0, 0, 0 };
+    const timeline: Timeline = .{
+        .duration_s_arrival = &durations,
+        .distance_km_effort = &efforts,
+    };
+    const distances = trace.distances_m_cumulative;
+
+    try testing.expectEqual(@as(f64, 0), timeline.duration_s_at(&trace, 0, 0));
+    try testing.expectEqual(@as(f64, 100), timeline.duration_s_at(&trace, 0, distances[1]));
+    try testing.expectEqual(@as(f64, 100), timeline.duration_s_at(&trace, 1, distances[1]));
+    const middle_m = (distances[1] + distances[2]) / 2;
+    try testing.expectApproxEqAbs(@as(f64, 250), timeline.duration_s_at(&trace, 1, middle_m), 1e-9);
+    try testing.expectEqual(@as(f64, 400), timeline.duration_s_at(&trace, 1, distances[2]));
 }
