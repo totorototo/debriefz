@@ -158,6 +158,7 @@ test "grp-160: a runner 10 % off the plan is measured and calibrated as such" {
         try testing.expectApproxEqAbs(runner_pace_ratio, section.pace_ratio.?, 0.02);
         try testing.expectEqual(@as(?f64, 140), section.heart_rate_bpm_average);
     }
+    try expect_stages_runner(&report, plan);
 
     // Splits every kilometer to the finish, never earlier than the one before, on both clocks.
     const splits = report.splits;
@@ -187,6 +188,48 @@ test "grp-160: a runner 10 % off the plan is measured and calibrated as such" {
     const finish_s = report.totals.duration_s_actual.?;
     try testing.expect(calibration.error_s_max_replanned < 0.02 * finish_s);
     try testing.expect(calibration.error_s_rms_replanned < calibration.error_s_rms_planned);
+}
+
+/// The stages of the synthetic runner: one per LifeBase plus one, from the GPX's waypoint
+/// types; each run at the recipe's pace ratio and 140 bpm; and together the sections, both
+/// clocks adding up.
+fn expect_stages_runner(report: *const debriefz.Report, plan: []const gpxz.PlanEntry) !void {
+    assert(plan.len >= 2);
+    var life_bases: usize = 0;
+    for (plan) |*entry| {
+        const type_name = entry.type_name orelse continue;
+        life_bases += @intFromBool(std.mem.eql(u8, type_name, "LifeBase"));
+    }
+    try testing.expect(life_bases > 0);
+    const stages = report.stages;
+    try testing.expectEqual(life_bases + 1, stages.len);
+    try testing.expectEqualStrings(plan[0].name, stages[0].from);
+    try testing.expectEqualStrings(plan[plan.len - 1].name, stages[stages.len - 1].to);
+
+    var section_index: u32 = 0;
+    for (stages, 1..) |*stage, number| {
+        try testing.expectEqual(section_index, stage.section_index_first);
+        try testing.expect(stage.section_index_end > stage.section_index_first);
+        // Every stage ends at a LifeBase, the last at the finish.
+        const end_type = if (number == stages.len) "Arrival" else "LifeBase";
+        try testing.expectEqualStrings(end_type, plan[stage.section_index_end].type_name.?);
+        try testing.expectApproxEqAbs(runner_pace_ratio, stage.pace_ratio.?, 0.02);
+        try testing.expectEqual(@as(?f64, 140), stage.heart_rate_bpm_average);
+        var planned_s: f64 = 0;
+        var actual_s: f64 = 0;
+        var distance_m: f64 = 0;
+        const grouped = report.sections[stage.section_index_first..stage.section_index_end];
+        for (grouped) |*section| {
+            planned_s += section.moving_s_planned;
+            actual_s += section.moving_s_actual.?;
+            distance_m += section.distance_m;
+        }
+        try testing.expectApproxEqAbs(planned_s, stage.moving_s_planned, 1e-6);
+        try testing.expectApproxEqAbs(actual_s, stage.moving_s_actual.?, 1e-6);
+        try testing.expectApproxEqAbs(distance_m, stage.distance_m, 1e-6);
+        section_index = stage.section_index_end;
+    }
+    try testing.expectEqual(@as(u32, @intCast(report.sections.len)), section_index);
 }
 
 /// The profile and the track of the synthetic runner, from its recipe: every point reached

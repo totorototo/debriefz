@@ -78,6 +78,32 @@ pub const Section = struct {
     distance_m_off_route: f64,
 };
 
+/// Between two stage boundaries (gpxz's: Start, LifeBase, Arrival, and the plan's two ends):
+/// the sections it groups, measured as one. Field for field a `Section`'s, so both print and
+/// draw alike.
+pub const Stage = struct {
+    from: []const u8,
+    to: []const u8,
+    /// The sections grouped: from `section_index_first` up to, not including,
+    /// `section_index_end`.
+    section_index_first: u32,
+    section_index_end: u32,
+    distance_m: f64,
+    elevation_gain_m: f64,
+    elevation_loss_m: f64,
+    /// The sections' planned moving times: the stops planned inside the stage are left out,
+    /// as the actual ones are.
+    moving_s_planned: f64,
+    /// Actual time between the two arrivals, less the time spent stopped.
+    moving_s_actual: ?f64,
+    stopped_s_actual: ?f64,
+    /// Actual over planned moving time: above 1, slower than planned.
+    pace_ratio: ?f64,
+    heart_rate_bpm_average: ?f64,
+    /// Odometer distance run off the planned trace within the stage.
+    distance_m_off_route: f64,
+};
+
 /// An off-route stretch, placed on the plan.
 pub const Deviation = struct {
     /// Along the plan, from the first checkpoint: where the runner left the trace, and where
@@ -144,6 +170,7 @@ pub const Report = struct {
     totals: Totals,
     checkpoints: []Checkpoint,
     sections: []Section,
+    stages: []Stage,
     climbs: []Climb,
     splits: []Split,
     deviations: []Deviation,
@@ -155,6 +182,7 @@ pub const Report = struct {
         allocator.free(self.deviations);
         allocator.free(self.checkpoints);
         allocator.free(self.sections);
+        allocator.free(self.stages);
         allocator.free(self.climbs);
         allocator.free(self.splits);
         allocator.free(self.profile);
@@ -224,6 +252,8 @@ pub fn compare(
     errdefer allocator.free(checkpoints);
     const sections = try sections_compute(allocator, &context, checkpoints);
     errdefer allocator.free(sections);
+    const stages = try stages_compute(allocator, &context, checkpoints, sections);
+    errdefer allocator.free(stages);
     const climbs = try climbs_compute(allocator, &context);
     errdefer allocator.free(climbs);
     const splits = try splits_compute(allocator, &context);
@@ -269,6 +299,7 @@ pub fn compare(
         .totals = totals_compute(&context, activity, match, checkpoints),
         .checkpoints = checkpoints,
         .sections = sections,
+        .stages = stages,
         .climbs = climbs,
         .splits = splits,
         .deviations = deviations,
@@ -278,6 +309,7 @@ pub fn compare(
     };
     assert(report.checkpoints.len == plan.len);
     assert(report.sections.len == plan.len - 1);
+    assert(report.stages.len >= 1 and report.stages.len <= report.sections.len);
     // Paired with the finish checkpoint: the profile's end is reached by the same rule.
     const finish = report.checkpoints[report.checkpoints.len - 1].duration_s_actual;
     assert(std.meta.eql(finish, report.profile[report.profile.len - 1].duration_s_actual));
@@ -350,6 +382,47 @@ fn margin_actual(
     return margin_s;
 }
 
+/// What the activity says between the arrivals at two checkpoints, race time `start` and
+/// `end`: shared by sections and stages, so the two measure alike.
+const IntervalActual = struct {
+    moving_s: ?f64 = null,
+    stopped_s: ?f64 = null,
+    pace_ratio: ?f64 = null,
+    heart_rate_bpm_average: ?f64 = null,
+    distance_m_off_route: f64 = 0,
+};
+
+/// Empty when either checkpoint wasn't reached.
+fn interval_actual(
+    context: *const Context,
+    start: ?f64,
+    end: ?f64,
+    moving_s_planned: f64,
+) IntervalActual {
+    assert(moving_s_planned >= 0);
+    const start_s = start orelse return .{};
+    const end_s = end orelse return .{};
+    assert(end_s >= start_s);
+    const epoch_s_start = context.epoch_s_origin + start_s;
+    const epoch_s_end = context.epoch_s_origin + end_s;
+    const stopped_s = @min(
+        context.actual.stopped_s_between(epoch_s_start, epoch_s_end),
+        end_s - start_s,
+    );
+    const moving_s = (end_s - start_s) - stopped_s;
+    assert(moving_s >= 0 and moving_s <= end_s - start_s);
+    return .{
+        .moving_s = moving_s,
+        .stopped_s = stopped_s,
+        .pace_ratio = if (moving_s_planned > 0) moving_s / moving_s_planned else null,
+        .heart_rate_bpm_average = context.actual.heart_rate_bpm_average(
+            epoch_s_start,
+            epoch_s_end,
+        ),
+        .distance_m_off_route = context.actual.off_route_m_between(epoch_s_start, epoch_s_end),
+    };
+}
+
 fn sections_compute(
     allocator: std.mem.Allocator,
     context: *const Context,
@@ -361,6 +434,12 @@ fn sections_compute(
     for (sections, plan[0 .. plan.len - 1], plan[1..], 0..) |*section, *from, *to, number| {
         const moving_s_planned = to.duration_s_arrival - from.duration_s_departure;
         assert(moving_s_planned >= 0);
+        const actual = interval_actual(
+            context,
+            checkpoints[number].duration_s_actual,
+            checkpoints[number + 1].duration_s_actual,
+            moving_s_planned,
+        );
         section.* = .{
             .from = from.name,
             .to = to.name,
@@ -368,36 +447,77 @@ fn sections_compute(
             .elevation_gain_m = to.elevation_gain_m - from.elevation_gain_m,
             .elevation_loss_m = to.elevation_loss_m - from.elevation_loss_m,
             .moving_s_planned = moving_s_planned,
-            .moving_s_actual = null,
-            .stopped_s_actual = null,
-            .pace_ratio = null,
-            .heart_rate_bpm_average = null,
-            .distance_m_off_route = 0,
+            .moving_s_actual = actual.moving_s,
+            .stopped_s_actual = actual.stopped_s,
+            .pace_ratio = actual.pace_ratio,
+            .heart_rate_bpm_average = actual.heart_rate_bpm_average,
+            .distance_m_off_route = actual.distance_m_off_route,
         };
-        const start = checkpoints[number].duration_s_actual orelse continue;
-        const end = checkpoints[number + 1].duration_s_actual orelse continue;
-        assert(end >= start);
-        const epoch_s_start = context.epoch_s_origin + start;
-        const epoch_s_end = context.epoch_s_origin + end;
-        const stopped_s = @min(
-            context.actual.stopped_s_between(epoch_s_start, epoch_s_end),
-            end - start,
-        );
-        const moving_s = (end - start) - stopped_s;
-        section.moving_s_actual = moving_s;
-        section.stopped_s_actual = stopped_s;
-        section.pace_ratio = if (moving_s_planned > 0) moving_s / moving_s_planned else null;
-        section.heart_rate_bpm_average = context.actual.heart_rate_bpm_average(
-            epoch_s_start,
-            epoch_s_end,
-        );
-        section.distance_m_off_route = context.actual.off_route_m_between(
-            epoch_s_start,
-            epoch_s_end,
-        );
-        assert(moving_s >= 0 and moving_s <= end - start);
     }
     return sections;
+}
+
+fn stages_compute(
+    allocator: std.mem.Allocator,
+    context: *const Context,
+    checkpoints: []const Checkpoint,
+    sections: []const Section,
+) ![]Stage {
+    const plan = context.plan;
+    assert(checkpoints.len == plan.len and sections.len + 1 == plan.len);
+    var boundaries: usize = 0;
+    for (0..plan.len) |number| boundaries += @intFromBool(stage_boundary(plan, number));
+    assert(boundaries >= 2 and boundaries <= plan.len);
+    const stages = try allocator.alloc(Stage, boundaries - 1);
+    var first: usize = 0;
+    var count: usize = 0;
+    for (1..plan.len) |number| {
+        if (!stage_boundary(plan, number)) continue;
+        var moving_s_planned: f64 = 0;
+        for (sections[first..number]) |*section| moving_s_planned += section.moving_s_planned;
+        const actual = interval_actual(
+            context,
+            checkpoints[first].duration_s_actual,
+            checkpoints[number].duration_s_actual,
+            moving_s_planned,
+        );
+        const from = &plan[first];
+        const to = &plan[number];
+        stages[count] = .{
+            .from = from.name,
+            .to = to.name,
+            .section_index_first = @intCast(first),
+            .section_index_end = @intCast(number),
+            .distance_m = to.distance_m - from.distance_m,
+            .elevation_gain_m = to.elevation_gain_m - from.elevation_gain_m,
+            .elevation_loss_m = to.elevation_loss_m - from.elevation_loss_m,
+            .moving_s_planned = moving_s_planned,
+            .moving_s_actual = actual.moving_s,
+            .stopped_s_actual = actual.stopped_s,
+            .pace_ratio = actual.pace_ratio,
+            .heart_rate_bpm_average = actual.heart_rate_bpm_average,
+            .distance_m_off_route = actual.distance_m_off_route,
+        };
+        count += 1;
+        first = number;
+    }
+    // The stages cover every section, once, in order.
+    assert(count == stages.len and first == plan.len - 1);
+    assert(stages[0].section_index_first == 0);
+    assert(stages[stages.len - 1].section_index_end == sections.len);
+    return stages;
+}
+
+/// gpxz's stage boundaries (Start, LifeBase, Arrival), plus the plan's two ends whatever
+/// their type: the stages must cover the whole plan, as the sections do.
+fn stage_boundary(plan: []const gpxz.PlanEntry, number: usize) bool {
+    assert(plan.len >= 2);
+    assert(number < plan.len);
+    if (number == 0 or number == plan.len - 1) return true;
+    const type_name = plan[number].type_name orelse return false;
+    return std.mem.eql(u8, type_name, gpxz.gpx_data.type_start) or
+        std.mem.eql(u8, type_name, gpxz.gpx_data.type_life_base) or
+        std.mem.eql(u8, type_name, gpxz.gpx_data.type_arrival);
 }
 
 fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Climb {
@@ -571,4 +691,43 @@ test "margin_actual: the start has none, and a stop eats into the margin" {
     try testing.expectEqual(@as(?f64, null), margin_actual(&entry, null, 60, 3));
     entry.epoch_s_cutoff = null;
     try testing.expectEqual(@as(?f64, null), margin_actual(&entry, 9_000, 60, 3));
+}
+
+test "stage_boundary: the plan's ends, and LifeBases between them" {
+    const entry = struct {
+        fn make(type_name: ?[]const u8) gpxz.PlanEntry {
+            return .{
+                .name = "",
+                .type_name = type_name,
+                .index = 0,
+                .latitude = 0,
+                .longitude = 0,
+                .elevation_m = 0,
+                .distance_m = 0,
+                .elevation_gain_m = 0,
+                .elevation_loss_m = 0,
+                .duration_s_arrival = 0,
+                .stop_s = 0,
+                .duration_s_departure = 0,
+                .epoch_s_arrival = null,
+                .epoch_s_cutoff = null,
+                .margin_s = null,
+            };
+        }
+    }.make;
+    // A plan that opens on a TimeBarrier still has its first stage start there.
+    const plan = [_]gpxz.PlanEntry{
+        entry("TimeBarrier"),
+        entry("TimeBarrier"),
+        entry("LifeBase"),
+        entry("Aid"),
+        entry(null),
+        entry("TimeBarrier"),
+    };
+    const expected = [_]bool{ true, false, true, false, false, true };
+    for (expected, 0..) |boundary, number| {
+        try testing.expectEqual(boundary, stage_boundary(&plan, number));
+    }
+    // The fewest: two entries, one stage.
+    try testing.expect(stage_boundary(plan[0..2], 0) and stage_boundary(plan[0..2], 1));
 }

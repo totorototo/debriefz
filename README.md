@@ -8,6 +8,7 @@ Plan vs actual for trail races: a Zig library and CLI that compares the plan
 
 - Checkpoints: planned and actual arrival, delta, time spent there, cutoff margin.
 - Sections: moving time planned vs actual (stops excluded), pace ratio, heart rate.
+- Stages: the same between LifeBases (gpxz's stage boundaries), each grouping its sections.
 - Climbs: planned and actual time and VAM.
 - Off-route stretches: where the runner left the planned trace, for how long and how far.
 - Calibration: the base pace and fatigue coefficient that would have predicted the race,
@@ -117,7 +118,7 @@ src/activity.zig        FIT bytes → Activity (positioned samples, session tota
 src/match.zig           map matching, off-route deviations, odometer, stopped intervals
 src/timeline.zig        gpxz's plan at every trace point
 src/actual.zig          queries on the matched activity (arrivals, stops, heart rate)
-src/compare.zig         the Report: checkpoints, sections, climbs, splits, deviations
+src/compare.zig         the Report: checkpoints, sections, stages, climbs, splits, deviations
 src/series.zig          the plan's profile on both clocks, and the track thinned for a map
 src/calibrate.zig       fitted pace and fatigue, and gpxz's plan rerun with them
 src/main.zig            the CLI

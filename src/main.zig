@@ -171,7 +171,8 @@ fn summary_write(writer: *Writer, report: *const debriefz.Report) Error!void {
     try writer.print("{s} — plan vs actual\n", .{report.name orelse "(unnamed route)"});
     try totals_write(writer, report);
     try checkpoints_write(writer, report);
-    try sections_write(writer, report.sections);
+    try intervals_write(writer, "sections", report.sections);
+    try intervals_write(writer, "stages", report.stages);
     try climbs_write(writer, report.climbs);
     try deviations_write(writer, report.deviations);
     if (report.calibration) |*calibration| {
@@ -243,10 +244,13 @@ fn checkpoints_write(writer: *Writer, report: *const debriefz.Report) Error!void
     }
 }
 
-fn sections_write(writer: *Writer, sections: []const debriefz.compare.Section) Error!void {
-    try writer.print("\nsections ({d}): moving time, stops excluded\n", .{sections.len});
-    try writer.writeAll("      km     D+     D-    plan  actual  ratio  stopped   HR  section\n");
-    for (sections) |*section| {
+/// Sections or stages: a `Stage` has every field of a `Section` this prints.
+fn intervals_write(writer: *Writer, comptime title: []const u8, intervals: anytype) Error!void {
+    comptime assert(std.mem.eql(u8, title, "sections") or std.mem.eql(u8, title, "stages"));
+    try writer.print("\n" ++ title ++ " ({d}): moving time, stops excluded\n", .{intervals.len});
+    try writer.writeAll("      km     D+     D-    plan  actual  ratio  stopped   HR  " ++
+        title[0 .. title.len - 1] ++ "\n");
+    for (intervals) |*section| {
         try writer.print("  {d:>6.1}  {d:>5.0}  {d:>5.0}  ", .{
             section.distance_m / 1000,
             section.elevation_gain_m,
