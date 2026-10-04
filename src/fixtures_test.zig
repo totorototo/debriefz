@@ -446,4 +446,24 @@ test "grp-160-2026.fit: arrivals agree with the SDK's, loops and out-and-backs i
     }
     try testing.expect(stretches_off_route >= report.deviations.len);
     try testing.expect(report.track.len < activity.samples.len / 10);
+
+    // Each stretch off route has the heart rate the watch recorded over it: within a beat or
+    // two of the plain mean of the raw samples (debriefz weights by each sample's interval).
+    try testing.expect(report.deviations.len > 0);
+    for (report.deviations) |*deviation| {
+        const epoch_s_start: f64 = @floatFromInt(report.totals.epoch_s_start_actual);
+        const from_s = epoch_s_start + deviation.duration_s_left;
+        const to_s = from_s + deviation.duration_s;
+        var sum: f64 = 0;
+        var count: f64 = 0;
+        for (activity.samples) |*sample| {
+            const epoch_s: f64 = @floatFromInt(sample.epoch_s);
+            if (epoch_s < from_s or epoch_s > to_s) continue;
+            const heart_rate = sample.heart_rate_bpm orelse continue;
+            sum += @floatFromInt(heart_rate);
+            count += 1;
+        }
+        try testing.expect(count > 0);
+        try testing.expectApproxEqAbs(sum / count, deviation.heart_rate_bpm_average.?, 2);
+    }
 }

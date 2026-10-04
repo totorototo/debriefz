@@ -329,7 +329,7 @@ fn descents_write(writer: *Writer, descents: []const debriefz.compare.Descent) E
 fn deviations_write(writer: *Writer, deviations: []const debriefz.compare.Deviation) Error!void {
     if (deviations.len == 0) return;
     try writer.print("\noff the planned trace ({d})\n", .{deviations.len});
-    try writer.writeAll("    left km  rejoined km      at    time   run km   max off\n");
+    try writer.writeAll("    left km  rejoined km      at    time   run km   max off   HR\n");
     for (deviations) |*deviation| {
         try optional_km_write(writer, deviation.distance_m_left);
         try writer.writeAll("       ");
@@ -338,10 +338,13 @@ fn deviations_write(writer: *Writer, deviations: []const debriefz.compare.Deviat
         try duration_write_width(writer, @max(deviation.duration_s_left, 0));
         try writer.writeAll("  ");
         try duration_write_width(writer, deviation.duration_s);
-        try writer.print("  {d:>7.2}  {d:>6.0} m\n", .{
+        try writer.print("  {d:>7.2}  {d:>6.0} m", .{
             deviation.distance_m / 1000,
             deviation.offset_m_max,
         });
+        if (deviation.heart_rate_bpm_average) |heart_rate| {
+            try writer.print("  {d:>3.0}\n", .{heart_rate});
+        } else try writer.writeAll("    -\n");
     }
 }
 

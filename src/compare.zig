@@ -115,6 +115,8 @@ pub const Deviation = struct {
     duration_s: f64,
     distance_m: f64,
     offset_m_max: f64,
+    /// Over the stretch, from the activity's own clock: the plan has no points to put it on.
+    heart_rate_bpm_average: ?f64,
 };
 
 pub const Climb = struct {
@@ -662,6 +664,10 @@ fn deviations_compute(
             .duration_s = source.duration_s,
             .distance_m = source.distance_m,
             .offset_m_max = source.offset_m_max,
+            .heart_rate_bpm_average = context.actual.heart_rate_bpm_average(
+                epoch_s,
+                epoch_s + source.duration_s,
+            ),
         };
         assert(deviation.duration_s >= 0 and deviation.distance_m >= 0);
     }
