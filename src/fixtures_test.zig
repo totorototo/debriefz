@@ -177,6 +177,19 @@ test "grp-160: a runner 10 % off the plan is measured and calibrated as such" {
         try testing.expect(climb.vam_m_per_h_planned.? > 0);
         try testing.expect(climb.duration_s_actual.? > 0);
     }
+    // And every descent, gpxz's, the run down to the finish among them.
+    try testing.expectEqual(data.trace.descents.len, report.descents.len);
+    try testing.expect(report.descents.len > 0);
+    for (report.descents) |*descent| {
+        try testing.expect(descent.descent_m_per_h_planned.? > 0);
+        try testing.expect(descent.duration_s_actual.? > 0);
+    }
+    const last = report.descents[report.descents.len - 1];
+    try testing.expectApproxEqAbs(
+        report.totals.distance_m_planned,
+        last.distance_m_start + last.distance_m,
+        1,
+    );
 
     const calibration = report.calibration.?;
     try testing.expectEqual(@as(u32, 0), calibration.sections_off_route);

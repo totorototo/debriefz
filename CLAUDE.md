@@ -20,7 +20,7 @@ debriefz only connects the two: parsing and the pace model stay in those librari
     each checkpoint.
   - `actual.zig`: queries on a matched activity (when a distance was first reached, stopped
     time, dwell at a checkpoint, heart rate, off-route distance).
-  - `compare.zig`: the `Report`: checkpoints, sections, stages, climbs, per-km splits,
+  - `compare.zig`: the `Report`: checkpoints, sections, stages, climbs, descents, per-km splits,
     deviations.
   - `series.zig`: the plan's profile every `profile_m` on both clocks, and the track thinned
     to one point every `track_m` of odometer, for drawing the race.

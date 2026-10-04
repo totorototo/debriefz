@@ -174,6 +174,7 @@ fn summary_write(writer: *Writer, report: *const debriefz.Report) Error!void {
     try intervals_write(writer, "sections", report.sections);
     try intervals_write(writer, "stages", report.stages);
     try climbs_write(writer, report.climbs);
+    try descents_write(writer, report.descents);
     try deviations_write(writer, report.deviations);
     if (report.calibration) |*calibration| {
         try calibration_write(writer, report, calibration);
@@ -292,6 +293,33 @@ fn climbs_write(writer: *Writer, climbs: []const debriefz.compare.Climb) Error!v
             try writer.print("{d:<5.0}", .{value});
         } else try writer.writeAll("-    ");
         if (climb.heart_rate_bpm_average) |heart_rate| {
+            try writer.print("  {d:>3.0}", .{heart_rate});
+        } else try writer.writeAll("    -");
+        try writer.writeByte('\n');
+    }
+}
+
+fn descents_write(writer: *Writer, descents: []const debriefz.compare.Descent) Error!void {
+    try writer.print("\ndescents ({d})\n", .{descents.len});
+    try writer.writeAll("       km    len    D-   top    plan  actual  m/h plan/actual   HR\n");
+    for (descents, 1..) |*descent, number| {
+        try writer.print("  {d:>2}. {d:>5.1}  {d:>4.1}k  {d:>4.0}  {d:>4.0}  ", .{
+            number,
+            descent.distance_m_start / 1000,
+            descent.distance_m / 1000,
+            descent.elevation_loss_m,
+            descent.elevation_m_top,
+        });
+        try duration_write_width(writer, descent.duration_s_planned);
+        try writer.writeAll("  ");
+        try optional_duration_write(writer, descent.duration_s_actual);
+        if (descent.descent_m_per_h_planned) |value| {
+            try writer.print("   {d:>5.0} / ", .{value});
+        } else try writer.writeAll("       - / ");
+        if (descent.descent_m_per_h_actual) |value| {
+            try writer.print("{d:<5.0}", .{value});
+        } else try writer.writeAll("-    ");
+        if (descent.heart_rate_bpm_average) |heart_rate| {
             try writer.print("  {d:>3.0}", .{heart_rate});
         } else try writer.writeAll("    -");
         try writer.writeByte('\n');

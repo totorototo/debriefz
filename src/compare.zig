@@ -134,6 +134,23 @@ pub const Climb = struct {
     heart_rate_bpm_average: ?f64,
 };
 
+/// A climb's mirror: from a top down to a bottom, as gpxz finds them.
+pub const Descent = struct {
+    /// Along the plan, from the first checkpoint, as every other distance in the report.
+    distance_m_start: f64,
+    distance_m: f64,
+    elevation_loss_m: f64,
+    gradient_percent_average: f64,
+    elevation_m_top: f64,
+    duration_s_planned: f64,
+    duration_s_actual: ?f64,
+    /// Vertical meters lost per hour, planned and actual: a descent's VAM. Planned is null
+    /// for a descent outside the plan, where no time is planned.
+    descent_m_per_h_planned: ?f64,
+    descent_m_per_h_actual: ?f64,
+    heart_rate_bpm_average: ?f64,
+};
+
 /// Race time at each kilometer, planned and actual: the gap curve.
 pub const Split = struct {
     distance_m: f64,
@@ -172,6 +189,7 @@ pub const Report = struct {
     sections: []Section,
     stages: []Stage,
     climbs: []Climb,
+    descents: []Descent,
     splits: []Split,
     deviations: []Deviation,
     calibration: ?calibrate.Calibration,
@@ -184,6 +202,7 @@ pub const Report = struct {
         allocator.free(self.sections);
         allocator.free(self.stages);
         allocator.free(self.climbs);
+        allocator.free(self.descents);
         allocator.free(self.splits);
         allocator.free(self.profile);
         allocator.free(self.track);
@@ -256,6 +275,8 @@ pub fn compare(
     errdefer allocator.free(stages);
     const climbs = try climbs_compute(allocator, &context);
     errdefer allocator.free(climbs);
+    const descents = try descents_compute(allocator, &context);
+    errdefer allocator.free(descents);
     const splits = try splits_compute(allocator, &context);
     errdefer allocator.free(splits);
     const deviations = try deviations_compute(allocator, &context, activity, match);
@@ -301,6 +322,7 @@ pub fn compare(
         .sections = sections,
         .stages = stages,
         .climbs = climbs,
+        .descents = descents,
         .splits = splits,
         .deviations = deviations,
         .calibration = calibration,
@@ -520,36 +542,62 @@ fn stage_boundary(plan: []const gpxz.PlanEntry, number: usize) bool {
         std.mem.eql(u8, type_name, gpxz.gpx_data.type_arrival);
 }
 
+/// Both clocks over a stretch of trace, between two of its points: shared by climbs and
+/// descents, so the two are timed alike.
+const TraceInterval = struct {
+    planned_s: f64,
+    actual_s: ?f64,
+    heart_rate_bpm_average: ?f64,
+};
+
+fn trace_interval(context: *const Context, index_start: usize, index_end: usize) TraceInterval {
+    assert(index_start < index_end);
+    const durations = context.timeline.duration_s_arrival;
+    assert(index_end < durations.len);
+    const planned_s = durations[index_end] - durations[index_start];
+    assert(planned_s >= 0);
+    const start = context.duration_s_at(context.trace_distance_m(index_start), 0);
+    // A stretch that ends at the finish (the run down to it) is reached by the finish's
+    // rule, as the finish checkpoint is: the runner stops a few meters short of the line.
+    const index_finish = context.plan[context.plan.len - 1].index;
+    const tolerance_m: f64 =
+        if (index_end >= index_finish) context.settings.finish_tolerance_m else 0;
+    const end = context.duration_s_at(context.trace_distance_m(index_end), tolerance_m);
+    if (start == null or end == null) {
+        return .{ .planned_s = planned_s, .actual_s = null, .heart_rate_bpm_average = null };
+    }
+    assert(end.? >= start.?);
+    return .{
+        .planned_s = planned_s,
+        .actual_s = end.? - start.?,
+        .heart_rate_bpm_average = context.actual.heart_rate_bpm_average(
+            context.epoch_s_origin + start.?,
+            context.epoch_s_origin + end.?,
+        ),
+    };
+}
+
 fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Climb {
     const trace = &context.data.trace;
     // gpxz places climbs along the trace; the report counts from the first checkpoint.
     const origin_m = context.trace_distance_m(context.plan[0].index);
-    const durations = context.timeline.duration_s_arrival;
     const climbs = try allocator.alloc(Climb, trace.climbs.len);
     for (trace.climbs, climbs) |*source, *climb| {
-        assert(source.index_start < source.index_end);
-        const planned_s = durations[source.index_end] - durations[source.index_start];
-        assert(planned_s >= 0);
-        const start = context.duration_s_at(context.trace_distance_m(source.index_start), 0);
-        const end = context.duration_s_at(context.trace_distance_m(source.index_end), 0);
-        const actual_s: ?f64 = if (start != null and end != null) end.? - start.? else null;
+        const interval = trace_interval(context, source.index_start, source.index_end);
         climb.* = .{
             .distance_m_start = source.distance_m_start - origin_m,
             .distance_m = source.distance_m,
             .elevation_gain_m = source.elevation_gain_m,
             .gradient_percent_average = source.gradient_percent_average,
             .elevation_m_summit = source.elevation_m_summit,
-            .duration_s_planned = planned_s,
-            .duration_s_actual = actual_s,
-            .vam_m_per_h_planned = vam(source.elevation_gain_m, planned_s),
-            .vam_m_per_h_actual = if (actual_s) |value|
+            .duration_s_planned = interval.planned_s,
+            .duration_s_actual = interval.actual_s,
+            .vam_m_per_h_planned = vam(source.elevation_gain_m, interval.planned_s),
+            .vam_m_per_h_actual = if (interval.actual_s) |value|
                 vam(source.elevation_gain_m, value)
             else
                 null,
-            .heart_rate_bpm_average = if (actual_s != null) context.actual.heart_rate_bpm_average(
-                context.epoch_s_origin + start.?,
-                context.epoch_s_origin + end.?,
-            ) else null,
+            .heart_rate_bpm_average = interval.heart_rate_bpm_average,
         };
     }
     // Paired with gpxz: each climb starts where its first trace point lies, less the origin.
@@ -559,6 +607,38 @@ fn climbs_compute(allocator: std.mem.Allocator, context: *const Context) ![]Clim
     }
     assert(climbs.len == trace.climbs.len);
     return climbs;
+}
+
+fn descents_compute(allocator: std.mem.Allocator, context: *const Context) ![]Descent {
+    const trace = &context.data.trace;
+    const origin_m = context.trace_distance_m(context.plan[0].index);
+    const descents = try allocator.alloc(Descent, trace.descents.len);
+    for (trace.descents, descents) |*source, *descent| {
+        const interval = trace_interval(context, source.index_start, source.index_end);
+        descent.* = .{
+            .distance_m_start = source.distance_m_start - origin_m,
+            .distance_m = source.distance_m,
+            .elevation_loss_m = source.elevation_loss_m,
+            .gradient_percent_average = source.gradient_percent_average,
+            .elevation_m_top = source.elevation_m_top,
+            .duration_s_planned = interval.planned_s,
+            .duration_s_actual = interval.actual_s,
+            // The VAM's formula on the drop: meters per hour, whichever way they go.
+            .descent_m_per_h_planned = vam(source.elevation_loss_m, interval.planned_s),
+            .descent_m_per_h_actual = if (interval.actual_s) |value|
+                vam(source.elevation_loss_m, value)
+            else
+                null,
+            .heart_rate_bpm_average = interval.heart_rate_bpm_average,
+        };
+    }
+    // Paired with gpxz, as the climbs: each starts where its first trace point lies.
+    for (trace.descents, descents) |*source, *descent| {
+        const start_m = context.trace_distance_m(source.index_start) - origin_m;
+        assert(@abs(descent.distance_m_start - start_m) < 1e-6);
+    }
+    assert(descents.len == trace.descents.len);
+    return descents;
 }
 
 fn deviations_compute(
