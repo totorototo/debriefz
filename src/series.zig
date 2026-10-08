@@ -330,8 +330,8 @@ test "track: thinned by odometer, ends and deviation edges kept" {
     progress[0] = null;
     // Off route for samples 5 and 6.
     var on_route = [_]bool{ true, true, true, true, true, false, false, true, true, true };
-    var offsets = [_]f64{0} ** 10;
-    var stopped = [_]bool{false} ** 10;
+    var offsets: [10]f64 = @splat(0);
+    var stopped: [10]bool = @splat(false);
     const match: Match = .{
         .progress_m = &progress,
         .offset_m = &offsets,

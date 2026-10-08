@@ -2,15 +2,15 @@
     .name = .debriefz,
     .version = "0.1.0",
     .fingerprint = 0xa566ead50d7912e8,
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .gpxz = .{
-            .url = "git+https://github.com/totorototo/gpxz#f2119d7c31ebd96c446894fb39914f4572f38e46",
-            .hash = "gpxz-0.1.0-euMO4pXGBACmjz76H-WXBAmUXv0IQo52FZhWTDHelSrp",
+            .url = "git+https://github.com/totorototo/gpxz#479ddc5ab9e9b0a932546a3d38e349d2f053aade",
+            .hash = "gpxz-0.1.0-euMO4qLFBADQRO1co0mh3uYHmUZ4kzDjREnFMccF0eBs",
         },
         .fitz = .{
-            .url = "git+https://github.com/totorototo/fitz#2320c39dd08a285121431b61a55957fa91ea76cf",
-            .hash = "fitz-0.1.0-K1sZO0o4CAA0VyNpLxE0WnIcdZ4fJXBFoZfw7uQ6W896",
+            .url = "git+https://github.com/totorototo/fitz#527eab7177588cd7d03ce36bc0817ccceed47e71",
+            .hash = "fitz-0.1.0-K1sZO7g4CACADumkJvjCJUGyU_GB1-qljz1r4oJLtvu6",
         },
     },
     .paths = .{

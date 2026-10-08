@@ -18,7 +18,7 @@ Plan vs actual for trail races: a Zig library and CLI that compares the plan
 debriefz only connects the two: parsing and the pace model stay in gpxz and fitz. The library
 is pure: it works on in-memory bytes and does no I/O.
 
-Requires **Zig 0.16.0**.
+Requires **Zig 0.17.0**.
 
 ## CLI
 

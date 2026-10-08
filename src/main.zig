@@ -531,7 +531,7 @@ test "options_parse: usage errors return null" {
     const stop_negative = [_][:0]const u8{ "debriefz", "--life-base-stop", "-1", "a", "b" };
     try std.testing.expect(options_parse(&stop_negative) == null);
     try std.testing.expect(options_parse(&.{ "debriefz", "a", "b", "--pace" }) == null);
-    const too_many = [_][:0]const u8{"--json"} ** arguments_max;
+    const too_many: [arguments_max][:0]const u8 = @splat("--json");
     try std.testing.expect(options_parse(&(.{"debriefz"} ++ too_many)) == null);
 }
 
