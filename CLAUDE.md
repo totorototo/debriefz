@@ -2,15 +2,17 @@
 
 ## Project
 
-Minimal Zig library + CLI that compares a race plan with the race that was run. The plan is a
-GPX route with typed waypoints, run through [gpxz](https://github.com/totorototo/gpxz)'s pace
-model; the race is a FIT activity, read with [fitz](https://github.com/totorototo/fitz).
+Minimal Zig library + CLI that compares a race plan with the race that was run. The plan is
+gpxz's `plan.json` for a course (a GPX route with typed waypoints), run through
+[gpxz](https://github.com/totorototo/gpxz)'s pace model; the race is a FIT activity, read with
+[fitz](https://github.com/totorototo/fitz).
 debriefz only connects the two: parsing and the pace model stay in those libraries.
 
 - `src/root.zig`: the library entry point. Re-exports every module and the main types.
-- `src/main.zig`: the CLI (`zig build run -- [--json] [plan options] plan.gpx activity.fit`).
-  All I/O lives here. The plan options (`--pace`, `--fatigue`, `--life-base-stop`) are gpxz's
-  and must match the ones the plan was made with.
+- `src/main.zig`: the CLI (`zig build run -- [--json] [--plan plan.json] course.gpx
+  activity.fit`). All I/O lives here. With `--plan`, the model is the file's; without it,
+  `--pace`, `--fatigue` and `--life-base-stop` give it and must match the plan's by hand. The
+  two are exclusive, so a flag never silently loses to the file.
 - The library is pure and does no I/O: bytes and slices in, owned structs out.
   - `activity.zig`: FIT bytes → `Activity` (positioned samples, session totals, UTC offset).
   - `match.zig`: map matching. Places each sample on the trace as a distance along it, with a
@@ -25,6 +27,11 @@ debriefz only connects the two: parsing and the pace model stay in those librari
   - `series.zig`: the plan's profile every `profile_m` on both clocks, and the track thinned
     to one point every `track_m` of odometer, for drawing the race.
   - `calibrate.zig`: fits pace and fatigue from the sections and reruns gpxz's plan with them.
+  - `plan_file.zig`: plan.json read with gpxz's reader, refused for another course
+    (`CourseMismatch`), its model as `gpxz.Settings`. debriefz still recomputes the plan (the
+    timeline needs the model between checkpoints), and `entries_check` refuses a file gpxz no
+    longer reproduces (`PlanStale`) within `duration_s_tolerance`. Not zero: Regimen's WASM
+    build and the native one differ by ~1e-12 s on a 160 km course.
 - `src/fixtures_test.zig` + `testdata/`: tests against real files, embedded by name (list them
   in `build.zig`). Expected values must come from outside debriefz (Garmin's FIT SDK, a
   synthetic runner's recipe), never from debriefz's own output. Never commit personal

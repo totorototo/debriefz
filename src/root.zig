@@ -10,6 +10,7 @@ pub const actual = @import("actual.zig");
 pub const compare = @import("compare.zig");
 pub const series = @import("series.zig");
 pub const calibrate = @import("calibrate.zig");
+pub const plan_file = @import("plan_file.zig");
 
 pub const Report = compare.Report;
 pub const Match = match.Match;

@@ -6,25 +6,32 @@ const debriefz = @import("debriefz");
 /// Multi-day ultra GPX files are a few MiB, and a 50-hour FIT at 1 Hz about 15 MiB.
 const file_size_max = 256 * 1024 * 1024;
 
-/// Two paths plus three flags with values fit well within this.
+/// Two paths plus four flags with values fit well within this.
 const arguments_max = 16;
 
 const usage =
-    \\usage: debriefz [--json] [--pace <s/km>] [--fatigue <k>] [--life-base-stop <s>]
-    \\                <plan.gpx> <activity.fit>
-    \\  Compares the plan gpxz builds from plan.gpx with the activity in activity.fit.
+    \\usage: debriefz [--json] [--plan <plan.json>] <course.gpx> <activity.fit>
+    \\       debriefz [--json] [--pace <s/km>] [--fatigue <k>] [--life-base-stop <s>]
+    \\                <course.gpx> <activity.fit>
+    \\  Compares the plan for course.gpx with the activity in activity.fit.
     \\  --json             print the report as JSON on stdout instead of the text summary
-    \\  --pace             the plan's flat-terrain base pace in s/km (default 500 = 8:20/km)
-    \\  --fatigue          the plan's fatigue coefficient (default 0.002)
-    \\  --life-base-stop   the plan's stop at each LifeBase in seconds (default 3600)
-    \\  The three plan options must match the ones the plan was made with.
+    \\  --plan             the plan as plan.json (from Regimen or gpxz --plan): its model is
+    \\                     used, and it must be for this course.gpx, byte for byte
+    \\  Without --plan, the model comes from these, which must match the plan's by hand:
+    \\  --pace             flat-terrain base pace in s/km (default 500 = 8:20/km)
+    \\  --fatigue          fatigue coefficient (default 0.002)
+    \\  --life-base-stop   stop at each LifeBase in seconds (default 3600)
     \\
 ;
 
 const Options = struct {
     json: bool = false,
     settings: gpxz.Settings = .{},
-    path_plan: []const u8,
+    /// Whether any of `--pace`, `--fatigue`, `--life-base-stop` was given: with `--plan`, the
+    /// model is the file's, and a flag that would silently lose to it is a usage error.
+    settings_given: bool = false,
+    path_plan: ?[]const u8 = null,
+    path_course: []const u8,
     path_activity: []const u8,
 };
 
@@ -39,35 +46,40 @@ pub fn main(init: std.process.Init) !void {
         std.process.exit(2);
     };
 
-    const plan_bytes = file_read(io, allocator, options.path_plan);
-    defer allocator.free(plan_bytes);
+    const course_bytes = file_read(io, allocator, options.path_course);
+    defer allocator.free(course_bytes);
     const activity_bytes = file_read(io, allocator, options.path_activity);
     defer allocator.free(activity_bytes);
 
-    var data = gpxz.parse(allocator, plan_bytes, &options.settings) catch |err| switch (err) {
+    var plan_file = try plan_file_load(io, allocator, &options, course_bytes);
+    defer if (plan_file) |*file| file.deinit();
+    const settings = if (plan_file) |*file| file.settings else options.settings;
+
+    var data = gpxz.parse(allocator, course_bytes, &settings) catch |err| switch (err) {
         error.OutOfMemory => return err,
-        else => |parse_error| fail(options.path_plan, parse_error),
+        else => |parse_error| fail(options.path_course, parse_error),
     };
     defer data.deinit(allocator);
+    if (plan_file) |*file| plan_file_check(&options, file, &data);
     var activity = debriefz.activity.parse(allocator, activity_bytes) catch |err| switch (err) {
         error.OutOfMemory => return err,
         else => |parse_error| fail(options.path_activity, parse_error),
     };
     defer activity.deinit(allocator);
-    if (data.trace.points.len < 2) fail(options.path_plan, error.TraceTooShort);
+    if (data.trace.points.len < 2) fail(options.path_course, error.TraceTooShort);
 
     var match = try debriefz.match.match(allocator, &data.trace, activity.samples, &.{});
     defer match.deinit(allocator);
     var report = debriefz.compare.compare(
         allocator,
         &data,
-        &options.settings,
+        &settings,
         &activity,
         &match,
         &.{},
     ) catch |err| switch (err) {
         error.OutOfMemory => return err,
-        error.PlanMissing => fail(options.path_plan, err),
+        error.PlanMissing => fail(options.path_course, err),
         error.ActivityNotOnRoute => fail(options.path_activity, err),
     };
     defer report.deinit(allocator);
@@ -87,6 +99,46 @@ pub fn main(init: std.process.Init) !void {
 fn fail(path: []const u8, err: anyerror) noreturn {
     std.debug.print("debriefz: {s}: {t}\n", .{ path, err });
     std.process.exit(1);
+}
+
+/// The plan.json `--plan` names, checked against the course, or null without `--plan`.
+fn plan_file_load(
+    io: std.Io,
+    allocator: std.mem.Allocator,
+    options: *const Options,
+    course_bytes: []const u8,
+) !?debriefz.plan_file.PlanFile {
+    const path = options.path_plan orelse return null;
+    assert(!options.settings_given);
+    const bytes = file_read(io, allocator, path);
+    defer allocator.free(bytes);
+    const file = debriefz.plan_file.load(allocator, bytes, course_bytes) catch |err| switch (err) {
+        error.OutOfMemory => return err,
+        // Another course, or this one edited: name the course too, since either may be wrong.
+        error.CourseMismatch => {
+            std.debug.print("debriefz: {s}: CourseMismatch: made for another file than {s}\n", .{
+                path,
+                options.path_course,
+            });
+            std.process.exit(1);
+        },
+        else => |read_error| fail(path, read_error),
+    };
+    assert(file.parsed.value.schema_version == gpxz.plan.schema_version);
+    return file;
+}
+
+/// Fails unless gpxz, run on the course with the file's model, gives the file's plan.
+fn plan_file_check(
+    options: *const Options,
+    file: *const debriefz.plan_file.PlanFile,
+    data: *const gpxz.GPXData,
+) void {
+    const path = options.path_plan.?;
+    assert(path.len > 0);
+    const recomputed = data.plan orelse fail(options.path_course, error.PlanMissing);
+    debriefz.plan_file.entries_check(file.parsed.value.entries, recomputed) catch |err|
+        fail(path, err);
 }
 
 fn file_read(io: std.Io, allocator: std.mem.Allocator, path: []const u8) []u8 {
@@ -117,7 +169,7 @@ fn options_parse(arguments: []const [:0]const u8) ?Options {
     assert(arguments.len >= 1);
     if (arguments.len > arguments_max) return null;
 
-    var options: Options = .{ .path_plan = "", .path_activity = "" };
+    var options: Options = .{ .path_course = "", .path_activity = "" };
     var paths: [2][]const u8 = undefined;
     var path_count: usize = 0;
     var index: usize = 1;
@@ -136,7 +188,8 @@ fn options_parse(arguments: []const [:0]const u8) ?Options {
         }
     }
     if (path_count != paths.len) return null;
-    options.path_plan = paths[0];
+    if (options.path_plan != null and options.settings_given) return null;
+    options.path_course = paths[0];
     options.path_activity = paths[1];
     assert(options.settings.pace_base_s_per_km > 0);
     assert(options.settings.fatigue_coefficient >= 0);
@@ -148,6 +201,12 @@ fn options_parse(arguments: []const [:0]const u8) ?Options {
 fn option_value_parse(options: *Options, flag: []const u8, value: []const u8) bool {
     assert(std.mem.startsWith(u8, flag, "--"));
     assert(!std.mem.eql(u8, flag, "--json"));
+    if (std.mem.eql(u8, flag, "--plan")) {
+        if (options.path_plan != null or value.len == 0) return false;
+        options.path_plan = value;
+        return true;
+    }
+    options.settings_given = true;
     if (std.mem.eql(u8, flag, "--pace")) {
         const pace = std.fmt.parseFloat(f64, value) catch return false;
         if (!(pace > 0) or !std.math.isFinite(pace)) return false;
@@ -501,7 +560,9 @@ test "options_parse: two paths and plan settings" {
     const options = options_parse(&.{
         "debriefz", "--pace", "560", "--fatigue", "0.003", "plan.gpx", "run.fit",
     }).?;
-    try std.testing.expectEqualStrings("plan.gpx", options.path_plan);
+    try std.testing.expectEqualStrings("plan.gpx", options.path_course);
+    try std.testing.expect(options.path_plan == null);
+    try std.testing.expect(options.settings_given);
     try std.testing.expectEqualStrings("run.fit", options.path_activity);
     try std.testing.expectEqual(@as(f64, 560), options.settings.pace_base_s_per_km);
     try std.testing.expectEqual(@as(f64, 0.003), options.settings.fatigue_coefficient);
@@ -533,6 +594,25 @@ test "options_parse: usage errors return null" {
     try std.testing.expect(options_parse(&.{ "debriefz", "a", "b", "--pace" }) == null);
     const too_many: [arguments_max][:0]const u8 = @splat("--json");
     try std.testing.expect(options_parse(&(.{"debriefz"} ++ too_many)) == null);
+}
+
+test "options_parse: --plan names the plan.json, and excludes the model flags" {
+    const options = options_parse(&.{ "debriefz", "--plan", "p.json", "c.gpx", "a.fit" }).?;
+    try std.testing.expectEqualStrings("p.json", options.path_plan.?);
+    try std.testing.expectEqualStrings("c.gpx", options.path_course);
+    try std.testing.expectEqualStrings("a.fit", options.path_activity);
+    try std.testing.expect(!options.settings_given);
+    const json = options_parse(&.{ "debriefz", "c.gpx", "--json", "--plan", "p", "a.fit" }).?;
+    try std.testing.expect(json.json);
+
+    const with_pace = [_][:0]const u8{ "debriefz", "--plan", "p", "--pace", "500", "c", "a" };
+    try std.testing.expect(options_parse(&with_pace) == null);
+    const pace_first = [_][:0]const u8{ "debriefz", "--fatigue", "0", "--plan", "p", "c", "a" };
+    try std.testing.expect(options_parse(&pace_first) == null);
+    const twice = [_][:0]const u8{ "debriefz", "--plan", "p", "--plan", "q", "c", "a" };
+    try std.testing.expect(options_parse(&twice) == null);
+    try std.testing.expect(options_parse(&.{ "debriefz", "--plan", "", "c", "a" }) == null);
+    try std.testing.expect(options_parse(&.{ "debriefz", "c", "a", "--plan" }) == null);
 }
 
 test "delta_write, clock_write, pace_write, utc_offset_write" {

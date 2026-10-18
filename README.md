@@ -23,16 +23,22 @@ Requires **Zig 0.17.0**.
 ## CLI
 
 ```sh
-zig build run -- route.gpx activity.fit            # text report
-zig build run -- --json route.gpx activity.fit     # the same, as JSON (plus splits, profile, track)
-zig build run -- --pace 450 --fatigue 0.003 route.gpx activity.fit
+zig build run -- --plan route.plan.json route.gpx activity.fit   # text report
+zig build run -- --json --plan route.plan.json route.gpx activity.fit
+zig build run -- --pace 450 --fatigue 0.003 route.gpx activity.fit  # no plan.json
 ```
 
-The plan options are gpxz's, and must match the ones the plan was made with:
+The plan is best given as `plan.json`, made in [Regimen](https://github.com/totorototo/regimen)
+or with `gpxz --plan`. It carries the model it was made with and the SHA-256 of its course, so
+debriefz uses that model, refuses a plan made for another GPX or an edited one
+(`CourseMismatch`), and refuses one gpxz no longer computes the same way (`PlanStale`: a
+checkpoint more than a second off). Without it, the model options must match the plan's by
+hand:
 
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--json` | off | Print the report as JSON |
+| `--plan <plan.json>` | none | The plan; excludes the three options below |
 | `--pace <s/km>` | 500 (8:20/km) | The plan's flat-terrain base pace |
 | `--fatigue <k>` | 0.002 | The plan's fatigue coefficient |
 | `--life-base-stop <s>` | 3600 | The plan's stop at each LifeBase |
@@ -122,6 +128,7 @@ src/actual.zig          queries on the matched activity (arrivals, stops, heart 
 src/compare.zig         the Report: checkpoints, sections, stages, climbs, descents, splits, deviations
 src/series.zig          the plan's profile on both clocks, and the track thinned for a map
 src/calibrate.zig       fitted pace and fatigue, and gpxz's plan rerun with them
+src/plan_file.zig       plan.json read, checked against the course, and its model as settings
 src/main.zig            the CLI
 src/fixtures_test.zig   tests against the files in testdata/
 ```
