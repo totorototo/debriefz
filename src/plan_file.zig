@@ -6,6 +6,9 @@
 //! debriefz still recomputes the plan from the course: the timeline needs the model between
 //! checkpoints, which plan.json doesn't hold. `entries_check` makes sure that recomputation is
 //! the plan in the file.
+//!
+//! A v2 file's fueling (`model.fueling`, `carry`) changes no time, so a debrief reads it as
+//! it reads a v1 file: gpxz's reader validates it, and the model is all debriefz takes.
 
 const std = @import("std");
 const assert = std.debug.assert;
@@ -87,7 +90,7 @@ const test_course =
     \\</trkseg></trk></gpx>
 ;
 
-/// plan.json for `test_course` with `settings`, as gpxz writes it.
+/// plan.json for `test_course` with `settings`, as gpxz writes it, without fueling.
 fn plan_json_test(settings: *const gpxz.Settings) ![]u8 {
     var data = try gpxz.parse(testing.allocator, test_course, settings);
     defer data.deinit(testing.allocator);
@@ -97,10 +100,50 @@ fn plan_json_test(settings: *const gpxz.Settings) ![]u8 {
         data.trace.distance_m,
         data.plan.?,
         settings,
+        null,
     );
+    return plan_json_write(&plan);
+}
+
+/// plan.json for `test_course` with `settings` and fueling, as Regimen writes it when the
+/// runner plans their fueling.
+fn plan_json_fueling_test(settings: *const gpxz.Settings) ![]u8 {
+    var data = try gpxz.parse(testing.allocator, test_course, settings);
+    defer data.deinit(testing.allocator);
+    const entries = data.plan.?;
+    assert(entries.len == 2);
+
+    var supplies: [2]gpxz.fueling.Supply = undefined;
+    gpxz.fueling.supplies_default(entries, &supplies);
+    const fueling: gpxz.fueling.Fueling = .{
+        .carbs_g_per_h = 60,
+        .fluid_ml_per_h = 500,
+        .sodium_mg_per_h = 400,
+        .reserve_s = 600,
+        .supplies = &supplies,
+    };
+    var times: [2]gpxz.fueling.Times = undefined;
+    gpxz.fueling.times_from_entries(entries, &times);
+    var carry: [2]?gpxz.fueling.Carry = undefined;
+    gpxz.fueling.carry_compute(&times, &fueling, &carry);
+
+    const fuel_plan: gpxz.fueling.FuelPlan = .{ .fueling = fueling, .carry = &carry };
+    const plan = gpxz.plan_build(
+        test_course,
+        data.metadata.name,
+        data.trace.distance_m,
+        entries,
+        settings,
+        &fuel_plan,
+    );
+    assert(plan.model.fueling != null);
+    return plan_json_write(&plan);
+}
+
+fn plan_json_write(plan: *const gpxz.Plan) ![]u8 {
     var out: std.Io.Writer.Allocating = .init(testing.allocator);
     errdefer out.deinit();
-    try gpxz.plan_write(&out.writer, &plan);
+    try gpxz.plan_write(&out.writer, plan);
     return out.toOwnedSlice();
 }
 
@@ -128,10 +171,52 @@ test "load: another course, or this one edited, is CourseMismatch" {
     try testing.expectError(error.CourseMismatch, load(testing.allocator, json, ""));
 }
 
+test "load: a v2 file with fueling gives the same model as one without" {
+    const settings: gpxz.Settings = .{
+        .pace_base_s_per_km = 430,
+        .fatigue_coefficient = 0.004,
+        .life_base_stop_s = 900,
+    };
+    const json = try plan_json_fueling_test(&settings);
+    defer testing.allocator.free(json);
+    var file = try load(testing.allocator, json, test_course);
+    defer file.deinit();
+    try testing.expectEqual(@as(u32, 2), file.parsed.value.schema_version);
+    try testing.expect(file.parsed.value.model.fueling != null);
+    try testing.expectEqual(settings.pace_base_s_per_km, file.settings.pace_base_s_per_km);
+    try testing.expectEqual(settings.fatigue_coefficient, file.settings.fatigue_coefficient);
+    try testing.expectEqual(settings.life_base_stop_s, file.settings.life_base_stop_s);
+
+    // Fueling changes no time: the recomputed plan is still the file's.
+    var recomputed = try gpxz.parse(testing.allocator, test_course, &file.settings);
+    defer recomputed.deinit(testing.allocator);
+    try entries_check(file.parsed.value.entries, recomputed.plan.?);
+}
+
+test "load: a v1 file, written before fueling, still loads" {
+    const json = try plan_json_test(&.{ .pace_base_s_per_km = 440 });
+    defer testing.allocator.free(json);
+    // A v2 file without fueling is a v1 file but for its version.
+    const version_v2 = "\"schema_version\": 2";
+    const version_v1 = "\"schema_version\": 1";
+    try testing.expectEqual(@as(usize, 1), std.mem.count(u8, json, version_v2));
+    const v1 = try std.mem.replaceOwned(u8, testing.allocator, json, version_v2, version_v1);
+    defer testing.allocator.free(v1);
+
+    var file = try load(testing.allocator, v1, test_course);
+    defer file.deinit();
+    try testing.expectEqual(@as(u32, 1), file.parsed.value.schema_version);
+    try testing.expect(file.parsed.value.model.fueling == null);
+    try testing.expectEqual(@as(f64, 440), file.settings.pace_base_s_per_km);
+}
+
 test "load: gpxz's read errors pass through" {
     try testing.expectError(error.SyntaxError, load(testing.allocator, "nope", test_course));
-    const v2 = "{\"schema_version\": 2}";
-    try testing.expectError(error.SchemaVersionUnsupported, load(testing.allocator, v2, ""));
+    // The version just past the newest gpxz writes, and none at all.
+    const v3 = "{\"schema_version\": 3}";
+    try testing.expectError(error.SchemaVersionUnsupported, load(testing.allocator, v3, ""));
+    const v0 = "{\"schema_version\": 0}";
+    try testing.expectError(error.SchemaVersionUnsupported, load(testing.allocator, v0, ""));
 }
 
 test "entries_check: gpxz's own plan passes; a changed model, name or count is stale" {

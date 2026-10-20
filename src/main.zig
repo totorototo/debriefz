@@ -124,7 +124,9 @@ fn plan_file_load(
         },
         else => |read_error| fail(path, read_error),
     };
-    assert(file.parsed.value.schema_version == gpxz.plan.schema_version);
+    // gpxz still reads older versions (v1 has no fueling), so only the range is known here.
+    assert(file.parsed.value.schema_version >= gpxz.plan.schema_version_read_min);
+    assert(file.parsed.value.schema_version <= gpxz.plan.schema_version);
     return file;
 }
 
