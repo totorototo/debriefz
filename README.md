@@ -142,6 +142,9 @@ zig build test --summary all
 
 ## Licenses
 
+debriefz is MIT, see `LICENSE`. It builds in fitz's profile tables, which stay under Garmin's
+FIT Protocol License: like fitz, it can't be put under a copyleft license.
+
 `testdata/Activity.fit` comes from
 [python-fitparse](https://github.com/dtcooper/python-fitparse) (MIT), through fitz;
 `testdata/grp-160-2026.gpx` comes from gpxz, and `testdata/grp-160-2026.fit` is the author's
