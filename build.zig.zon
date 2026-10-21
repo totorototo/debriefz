@@ -9,8 +9,8 @@
             .hash = "gpxz-0.2.0-euMO4rE7BgA5t0gLYqvHw0wD4egZJu4JuYCLVbQEqmIp",
         },
         .fitz = .{
-            .url = "git+https://github.com/totorototo/fitz#e60d4a85fa86779c9f155d7a10b6521c3c4644d9",
-            .hash = "fitz-0.1.0-K1sZO1o5CAAQV2M_bTqqHAJpUplfdXhDH1ujVNmmEuwL",
+            .url = "git+https://github.com/totorototo/fitz?ref=v0.2.0#03be16e6bcc2e164ec8ed6eb4bcc6b314165bd75",
+            .hash = "fitz-0.2.0-K1sZO2WKCAD1Blvupxjghf4OmFLYetqSrGS8jHZe-Fkf",
         },
     },
     .paths = .{

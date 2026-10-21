@@ -72,6 +72,9 @@ pub fn build(b: *std.Build) void {
     fixtures_module.addAnonymousImport("grp-160-2026.fit", .{
         .root_source_file = b.path("testdata/grp-160-2026.fit"),
     });
+    fixtures_module.addAnonymousImport("coros-pace-2-cycling-misaligned-fields.fit", .{
+        .root_source_file = b.path("testdata/coros-pace-2-cycling-misaligned-fields.fit"),
+    });
     const fixtures_tests = b.addTest(.{ .root_module = fixtures_module });
     test_step.dependOn(&b.addRunArtifact(fixtures_tests).step);
 }
