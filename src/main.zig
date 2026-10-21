@@ -54,6 +54,8 @@ pub fn main(init: std.process.Init) !void {
     var plan_file = try plan_file_load(io, allocator, &options, course_bytes);
     defer if (plan_file) |*file| file.deinit();
     const settings = if (plan_file) |*file| file.settings else options.settings;
+    // Checked here, so a pace out of range names the plan or the flags, not the course.
+    settings.validate() catch |err| fail(options.path_plan orelse "--pace/--fatigue", err);
 
     var data = gpxz.parse(allocator, course_bytes, &settings) catch |err| switch (err) {
         error.OutOfMemory => return err,
@@ -81,6 +83,8 @@ pub fn main(init: std.process.Init) !void {
         error.OutOfMemory => return err,
         error.PlanMissing => fail(options.path_course, err),
         error.ActivityNotOnRoute => fail(options.path_activity, err),
+        // Validated above, before the course was parsed.
+        error.SettingsInvalid => unreachable,
     };
     defer report.deinit(allocator);
 
