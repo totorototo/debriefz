@@ -11,6 +11,18 @@ const debriefz = @import("debriefz");
 const activity_fit = @embedFile("Activity.fit");
 const route_gpx = @embedFile("grp-160-2026.gpx");
 const race_fit = @embedFile("grp-160-2026.fit");
+const coros_fit = @embedFile("coros-pace-2-cycling-misaligned-fields.fit");
+
+test "coros-pace-2-cycling-misaligned-fields.fit: a Coros file with mis-sized fields reads" {
+    // fitz's strict parse refuses this file (an event field is a uint32 of size 1); debriefz
+    // reads it leniently, as the FIT SDK does. 11272 is the file's record message count, as fitz
+    // reads it: its total, 11293 messages, is fitparse's.
+    var activity = try debriefz.activity.parse(testing.allocator, coros_fit);
+    defer activity.deinit(testing.allocator);
+    try testing.expect(activity.samples.len > 0);
+    const records = activity.samples.len + activity.records_without_position;
+    try testing.expectEqual(@as(usize, 11272), records);
+}
 
 test "Activity.fit: samples and session match Garmin's FIT SDK" {
     var activity = try debriefz.activity.parse(testing.allocator, activity_fit);

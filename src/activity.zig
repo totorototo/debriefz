@@ -11,32 +11,42 @@ const fitz = @import("fitz");
 /// re-export it).
 const timestamp_field_number: u8 = 253;
 
-/// Global message numbers from the FIT profile.
-const message_record: u16 = 20;
-const message_session: u16 = 18;
-const message_activity: u16 = 34;
+/// Global message numbers, by name from fitz's profile.
+const Message = fitz.profile.Message;
+const message_record = @backingInt(Message.record);
+const message_session = @backingInt(Message.session);
+const message_activity = @backingInt(Message.activity);
 
 /// Field definition number of `local_timestamp` in `activity`.
-const activity_local_timestamp: u8 = 5;
+const activity_local_timestamp = @backingInt(fitz.profile.FieldNumber(.activity).local_timestamp);
 
 /// UTC offsets run from -12:00 to +14:00.
 const utc_offset_s_max = 14 * 3600;
 
 /// Field definition numbers in `record`.
-const record_position_lat: u8 = 0;
-const record_position_long: u8 = 1;
-const record_altitude: u8 = 2;
-const record_heart_rate: u8 = 3;
-const record_distance: u8 = 5;
-const record_enhanced_altitude: u8 = 78;
+const RecordField = fitz.profile.FieldNumber(.record);
+const record_position_lat = @backingInt(RecordField.position_lat);
+const record_position_long = @backingInt(RecordField.position_long);
+const record_altitude = @backingInt(RecordField.altitude);
+const record_heart_rate = @backingInt(RecordField.heart_rate);
+const record_distance = @backingInt(RecordField.distance);
+const record_enhanced_altitude = @backingInt(RecordField.enhanced_altitude);
 
 /// Field definition numbers in `session`.
-const session_start_time: u8 = 2;
-const session_total_elapsed_time: u8 = 7;
-const session_total_timer_time: u8 = 8;
-const session_total_distance: u8 = 9;
-const session_total_ascent: u8 = 22;
-const session_total_descent: u8 = 23;
+const SessionField = fitz.profile.FieldNumber(.session);
+const session_start_time = @backingInt(SessionField.start_time);
+const session_total_elapsed_time = @backingInt(SessionField.total_elapsed_time);
+const session_total_timer_time = @backingInt(SessionField.total_timer_time);
+const session_total_distance = @backingInt(SessionField.total_distance);
+const session_total_ascent = @backingInt(SessionField.total_ascent);
+const session_total_descent = @backingInt(SessionField.total_descent);
+
+comptime {
+    // The numbers debriefz was written against, from the FIT SDK's Profile.xlsx.
+    assert(message_record == 20 and message_session == 18 and message_activity == 34);
+    assert(record_heart_rate == 3 and record_enhanced_altitude == 78);
+    assert(session_total_elapsed_time == 7 and session_total_descent == 23);
+}
 
 /// A month of 1 Hz recording. A FIT file is at most 4 GiB, but no activity worth comparing to
 /// a plan comes close, so a larger count is a limit, not a guess.
@@ -99,8 +109,14 @@ pub const Activity = struct {
 
 /// Parses the records and the session of a FIT activity. fitz checks every CRC first, so a
 /// damaged file is an error, never a partial activity. The caller owns the result.
+///
+/// A field whose size doesn't fit its base type (Coros writes a uint32 of size 1) is read as
+/// bytes, as the FIT SDK does, rather than refusing the watch's file: the runner can't fix it.
+/// debriefz reads only numbers, so such a field counts as missing.
 pub fn parse(allocator: std.mem.Allocator, bytes: []const u8) !Activity {
-    var parser = try fitz.Parser.init(allocator, bytes);
+    var parser = try fitz.Parser.init_options(allocator, bytes, .{
+        .field_size_mismatch = .bytes,
+    });
     defer parser.deinit();
 
     var samples: std.ArrayList(Sample) = .empty;
