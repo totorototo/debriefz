@@ -10,11 +10,14 @@ const file_size_max = 256 * 1024 * 1024;
 const arguments_max = 16;
 
 const usage =
-    \\usage: debriefz [--json] [--plan <plan.json>] <course.gpx> <activity.fit>
-    \\       debriefz [--json] [--pace <s/km>] [--fatigue <k>] [--life-base-stop <s>]
-    \\                <course.gpx> <activity.fit>
+    \\usage: debriefz [--json] [--gpx <out.gpx>] [--plan <plan.json>] <course.gpx> <activity.fit>
+    \\       debriefz [--json] [--gpx <out.gpx>] [--pace <s/km>] [--fatigue <k>]
+    \\                [--life-base-stop <s>] <course.gpx> <activity.fit>
     \\  Compares the plan for course.gpx with the activity in activity.fit.
     \\  --json             print the report as JSON on stdout instead of the text summary
+    \\  --gpx              also write the race as run to out.gpx: the recorded track less the
+    \\                     checkpoint stops, the steps back and the jitter, never retimed;
+    \\                     the checkpoints keep their cutoffs, with the actual times as <desc>
     \\  --plan             the plan as plan.json (from Regimen or gpxz --plan): its model is
     \\                     used, and it must be for this course.gpx, byte for byte
     \\  Without --plan, the model comes from these, which must match the plan's by hand:
@@ -31,6 +34,7 @@ const Options = struct {
     /// model is the file's, and a flag that would silently lose to it is a usage error.
     settings_given: bool = false,
     path_plan: ?[]const u8 = null,
+    path_gpx: ?[]const u8 = null,
     path_course: []const u8,
     path_activity: []const u8,
 };
@@ -87,6 +91,9 @@ pub fn main(init: std.process.Init) !void {
         error.SettingsInvalid => unreachable,
     };
     defer report.deinit(allocator);
+    if (options.path_gpx) |path| {
+        try race_gpx_write(io, allocator, path, &data, &activity, &match, &report);
+    }
 
     var stdout_buffer: [4096]u8 = undefined;
     var stdout_writer = std.Io.File.stdout().writer(io, &stdout_buffer);
@@ -97,6 +104,45 @@ pub fn main(init: std.process.Init) !void {
         }
         return err;
     };
+}
+
+/// Writes the race as run to `path`, built in memory first so a failure leaves no half file.
+fn race_gpx_write(
+    io: std.Io,
+    allocator: std.mem.Allocator,
+    path: []const u8,
+    data: *const gpxz.GPXData,
+    activity: *const debriefz.Activity,
+    match: *const debriefz.Match,
+    report: *const debriefz.Report,
+) !void {
+    assert(path.len > 0);
+    const race_gpx = debriefz.race_gpx;
+    const stops = try race_gpx.stops_from_checkpoints(allocator, report.checkpoints);
+    defer allocator.free(stops);
+    const kept = try race_gpx.samples_keep(allocator, activity.samples, match, stops, &.{});
+    defer allocator.free(kept);
+    const waypoints = try race_gpx.waypoints_annotate(
+        allocator,
+        data.waypoints,
+        report.checkpoints,
+        activity.utc_offset_s orelse 0,
+    );
+    defer race_gpx.waypoints_free(allocator, waypoints);
+    const name = try std.fmt.allocPrint(allocator, "{s}, as run", .{
+        data.metadata.name orelse "Race",
+    });
+    defer allocator.free(name);
+
+    var out: std.Io.Writer.Allocating = .init(allocator);
+    defer out.deinit();
+    race_gpx.write(&out.writer, name, waypoints, activity.samples, kept) catch |err| switch (err) {
+        error.WriteFailed => return error.OutOfMemory,
+        // gpxz parsed these waypoints, and the samples' times come from a FIT file: in range.
+        else => unreachable,
+    };
+    std.Io.Dir.cwd().writeFile(io, .{ .sub_path = path, .data = out.written() }) catch |err|
+        fail(path, err);
 }
 
 /// A bad input file is the user's input, not a bug: report it and exit 1 without a trace.
@@ -210,6 +256,11 @@ fn option_value_parse(options: *Options, flag: []const u8, value: []const u8) bo
     if (std.mem.eql(u8, flag, "--plan")) {
         if (options.path_plan != null or value.len == 0) return false;
         options.path_plan = value;
+        return true;
+    }
+    if (std.mem.eql(u8, flag, "--gpx")) {
+        if (options.path_gpx != null or value.len == 0) return false;
+        options.path_gpx = value;
         return true;
     }
     options.settings_given = true;
@@ -619,6 +670,19 @@ test "options_parse: --plan names the plan.json, and excludes the model flags" {
     try std.testing.expect(options_parse(&twice) == null);
     try std.testing.expect(options_parse(&.{ "debriefz", "--plan", "", "c", "a" }) == null);
     try std.testing.expect(options_parse(&.{ "debriefz", "c", "a", "--plan" }) == null);
+}
+
+test "options_parse: --gpx names the race file, once" {
+    const options = options_parse(&.{ "debriefz", "--gpx", "out.gpx", "c.gpx", "a.fit" }).?;
+    try std.testing.expectEqualStrings("out.gpx", options.path_gpx.?);
+    try std.testing.expect(!options.settings_given);
+    try std.testing.expect(options_parse(&.{ "debriefz", "c.gpx", "a.fit" }).?.path_gpx == null);
+    const with_plan = [_][:0]const u8{ "debriefz", "--gpx", "o", "--plan", "p", "c", "a" };
+    try std.testing.expectEqualStrings("p", options_parse(&with_plan).?.path_plan.?);
+    const twice = [_][:0]const u8{ "debriefz", "--gpx", "o", "--gpx", "q", "c", "a" };
+    try std.testing.expect(options_parse(&twice) == null);
+    try std.testing.expect(options_parse(&.{ "debriefz", "--gpx", "", "c", "a" }) == null);
+    try std.testing.expect(options_parse(&.{ "debriefz", "c", "a", "--gpx" }) == null);
 }
 
 test "delta_write, clock_write, pace_write, utc_offset_write" {

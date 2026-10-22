@@ -9,10 +9,10 @@ gpxz's `plan.json` for a course (a GPX route with typed waypoints), run through
 debriefz only connects the two: parsing and the pace model stay in those libraries.
 
 - `src/root.zig`: the library entry point. Re-exports every module and the main types.
-- `src/main.zig`: the CLI (`zig build run -- [--json] [--plan plan.json] course.gpx
-  activity.fit`). All I/O lives here. With `--plan`, the model is the file's; without it,
-  `--pace`, `--fatigue` and `--life-base-stop` give it and must match the plan's by hand. The
-  two are exclusive, so a flag never silently loses to the file.
+- `src/main.zig`: the CLI (`zig build run -- [--json] [--gpx out.gpx] [--plan plan.json]
+  course.gpx activity.fit`). All I/O lives here. With `--plan`, the model is the file's;
+  without it, `--pace`, `--fatigue` and `--life-base-stop` give it and must match the plan's
+  by hand. The two are exclusive, so a flag never silently loses to the file.
 - The library is pure and does no I/O: bytes and slices in, owned structs out.
   - `activity.zig`: FIT bytes → `Activity` (positioned samples, session totals, UTC offset).
   - `match.zig`: map matching. Places each sample on the trace as a distance along it, with a
@@ -27,6 +27,9 @@ debriefz only connects the two: parsing and the pace model stay in those librari
   - `series.zig`: the plan's profile every `profile_m` on both clocks, and the track thinned
     to one point every `track_m` of odometer, for drawing the race.
   - `calibrate.zig`: fits pace and fatigue from the sections and reruns gpxz's plan with them.
+  - `race_gpx.zig`: the race as run, as GPX. Only drops samples (checkpoint stops but their
+    arrival and departure, steps back along the course, jitter), never moves or retimes one;
+    off-route samples are kept.
   - `plan_file.zig`: plan.json read with gpxz's reader, refused for another course
     (`CourseMismatch`), its model as `gpxz.Settings`. debriefz still recomputes the plan (the
     timeline needs the model between checkpoints), and `entries_check` refuses a file gpxz no
