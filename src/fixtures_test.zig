@@ -479,3 +479,59 @@ test "grp-160-2026.fit: arrivals agree with the SDK's, loops and out-and-backs i
         try testing.expectApproxEqAbs(sum / count, deviation.heart_rate_bpm_average.?, 2);
     }
 }
+
+test "grp-160-2026.fit: the race as run is the recording, shorter, never retimed" {
+    const allocator = testing.allocator;
+    const settings: gpxz.Settings = .{};
+    var data = try gpxz.parse(allocator, route_gpx, &settings);
+    defer data.deinit(allocator);
+    var activity = try debriefz.activity.parse(allocator, race_fit);
+    defer activity.deinit(allocator);
+    var match = try debriefz.match.match(allocator, &data.trace, activity.samples, &.{});
+    defer match.deinit(allocator);
+    var report = try debriefz.compare.compare(allocator, &data, &settings, &activity, &match, &.{});
+    defer report.deinit(allocator);
+
+    const race_gpx = debriefz.race_gpx;
+    const stops = try race_gpx.stops_from_checkpoints(allocator, report.checkpoints);
+    defer allocator.free(stops);
+    const kept = try race_gpx.samples_keep(allocator, activity.samples, &match, stops, &.{});
+    defer allocator.free(kept);
+    const checkpoints = report.checkpoints;
+    const waypoints = try race_gpx.waypoints_annotate(allocator, data.waypoints, checkpoints, 7200);
+    defer race_gpx.waypoints_free(allocator, waypoints);
+    var out: std.Io.Writer.Allocating = .init(allocator);
+    defer out.deinit();
+    try race_gpx.write(&out.writer, "GRP", waypoints, activity.samples, kept);
+
+    // Read back with gpxz: the same points, start and finish, as the FIT's.
+    var written = try gpxz.parse(allocator, out.written(), &settings);
+    defer written.deinit(allocator);
+    try testing.expectEqual(kept.len, written.points_full_resolution.len / 3);
+    try testing.expectEqual(data.waypoints.len, written.waypoints.len);
+    const points = written.points_full_resolution;
+    const first = activity.samples[0];
+    const last = activity.samples[activity.samples.len - 1];
+    try testing.expectApproxEqAbs(first.latitude, points[0], 1e-7);
+    try testing.expectApproxEqAbs(last.longitude, points[points.len - 2], 1e-7);
+    // The FIT's first and last record times, as Garmin's FIT SDK reads them.
+    const text = out.written();
+    const start = "<time>2026-08-21T03:03:47Z</time></trkpt>";
+    const finish = "<time>2026-08-23T04:44:58Z</time></trkpt>";
+    try testing.expect(std.mem.indexOf(u8, text, start) != null);
+    try testing.expect(std.mem.indexOf(u8, text, finish) != null);
+
+    // Shorter than the watch's 182.9 km, longer than the 173.3 km course: the 8.9 km run off
+    // it after km 161.8 stays.
+    var distance_m: f64 = 0;
+    for (kept[1..], kept[0 .. kept.len - 1]) |index, previous| {
+        const a = &activity.samples[previous];
+        const b = &activity.samples[index];
+        const from: [3]f64 = .{ a.latitude, a.longitude, 0 };
+        distance_m += gpxz.gps_point.distance(from, .{ b.latitude, b.longitude, 0 });
+    }
+    const course = data.trace.distances_m_cumulative;
+    try testing.expect(distance_m < activity.session.distance_m.?);
+    try testing.expect(distance_m > course[course.len - 1]);
+    try testing.expect(kept.len < activity.samples.len / 2);
+}

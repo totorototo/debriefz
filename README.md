@@ -26,6 +26,7 @@ Requires **Zig 0.17.0**.
 zig build run -- --plan route.plan.json route.gpx activity.fit   # text report
 zig build run -- --json --plan route.plan.json route.gpx activity.fit
 zig build run -- --pace 450 --fatigue 0.003 route.gpx activity.fit  # no plan.json
+zig build run -- --gpx race.gpx --plan route.plan.json route.gpx activity.fit
 ```
 
 The plan is best given as `plan.json`, made in [Regimen](https://github.com/totorototo/regimen)
@@ -38,10 +39,19 @@ hand:
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--json` | off | Print the report as JSON |
+| `--gpx <out.gpx>` | none | Also write the race as run (below) |
 | `--plan <plan.json>` | none | The plan; excludes the three options below |
 | `--pace <s/km>` | 500 (8:20/km) | The plan's flat-terrain base pace |
 | `--fatigue <k>` | 0.002 | The plan's fatigue coefficient |
 | `--life-base-stop <s>` | 3600 | The plan's stop at each LifeBase |
+
+`--gpx` writes the activity as a GPX track, cleaned of what a race day adds: inside each
+checkpoint stop only the arrival and departure samples are kept, a sample on the course that
+doesn't get past the farthest point reached is dropped (turnarounds), and so is one within 3 m
+of the last kept (standing still). Off-course samples stay: they were run. Samples are only
+dropped, never moved or retimed, so the start, finish and duration are the recording's. The
+course's checkpoints keep their cutoffs as `<time>`, with the actual arrival and departure
+as `<desc>`.
 
 The GPX needs typed waypoints (`Start`, `TimeBarrier`, `LifeBase`, `Arrival`), since that's
 what gpxz builds a plan from.
@@ -129,6 +139,7 @@ src/compare.zig         the Report: checkpoints, sections, stages, climbs, desce
 src/series.zig          the plan's profile on both clocks, and the track thinned for a map
 src/calibrate.zig       fitted pace and fatigue, and gpxz's plan rerun with them
 src/plan_file.zig       plan.json read, checked against the course, and its model as settings
+src/race_gpx.zig        the race as run, as a GPX track: stops, steps back and jitter dropped
 src/main.zig            the CLI
 src/fixtures_test.zig   tests against the files in testdata/
 ```
