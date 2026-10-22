@@ -1,21 +1,22 @@
 .{
     .name = .debriefz,
-    .version = "0.4.0",
+    .version = "0.4.1",
     .fingerprint = 0xa566ead50d7912e8,
     .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .gpxz = .{
-            .url = "git+https://github.com/totorototo/gpxz?ref=v0.3.0#9aeec26b148558b2d28e76cf427b518d80b0daec",
-            .hash = "gpxz-0.3.0-euMO4g9qBgDmHyHTTGTHdl7se3aZmPgfaIQk0ljch9Ki",
+            .url = "git+https://github.com/totorototo/gpxz?ref=v0.3.1#c33efa3431b08d0e0408be386cd73f74b19dfc86",
+            .hash = "gpxz-0.3.1-euMO4rZ_BgCivQ_9PP3BNCRomr2dNxTCHYtjkuAtz9f5",
         },
         .fitz = .{
-            .url = "git+https://github.com/totorototo/fitz?ref=v0.2.0#03be16e6bcc2e164ec8ed6eb4bcc6b314165bd75",
-            .hash = "fitz-0.2.0-K1sZO2WKCAD1Blvupxjghf4OmFLYetqSrGS8jHZe-Fkf",
+            .url = "git+https://github.com/totorototo/fitz?ref=v0.2.1#3f9ea9bc7e7fcbd7e2d4f4d663ae45f4308cde22",
+            .hash = "fitz-0.2.1-K1sZO6mQCACkChm4T31LkhaoMeXN4Z3d2hY1NTyynfwa",
         },
     },
     .paths = .{
         "build.zig",
         "build.zig.zon",
         "src",
+        "LICENSE",
     },
 }
